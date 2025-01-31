@@ -16,13 +16,10 @@
 
 package me.alexy.hipipl.test.app.testdi
 
-import dagger.Binds
 import dagger.Module
 import dagger.hilt.components.SingletonComponent
 import dagger.hilt.testing.TestInstallIn
-import me.alexy.hipipl.core.data.HostItemRepository
 import me.alexy.hipipl.core.data.di.DataModule
-import me.alexy.hipipl.core.data.di.FakeHostItemRepository
 
 @Module
 @TestInstallIn(
@@ -31,8 +28,8 @@ import me.alexy.hipipl.core.data.di.FakeHostItemRepository
 )
 interface FakeDataModule {
 
-    @Binds
-    abstract fun bindRepository(
-        fakeRepository: FakeHostItemRepository
-    ): HostItemRepository
+//    @Binds
+//    abstract fun bindRepository(
+//        fakeRepository: FakeHostRepository
+//    ): HostRepository
 }
