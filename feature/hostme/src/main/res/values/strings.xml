@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="host_search">Поиск хостов</string>
+    <string name="enter_city">Напиши название города</string>
+    <string name="nothing_found">Ничего не нашлось</string>
+</resources>
