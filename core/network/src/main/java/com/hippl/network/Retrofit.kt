@@ -37,8 +37,7 @@ internal class RetrofitDataSource @Inject constructor(
         // to prevent initializing OkHttp on the main thread.
         .callFactory { okhttpCallFactory.newCall(it) }
         .addConverterFactory(
-//            networkJson.asConverterFactory("application/json".toMediaType()),
-            networkJson.asConverterFactory("text/html".toMediaType()),
+            networkJson.asConverterFactory("application/json".toMediaType()),
         )
         .build()
         .create(RetrofitNetworkApi::class.java)

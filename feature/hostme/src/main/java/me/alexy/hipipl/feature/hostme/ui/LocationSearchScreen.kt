@@ -139,13 +139,13 @@ fun LocationListItem(location: Location) {
     Column {
         with(location) {
             Text(
-                listOf(name, regionName, countryName)
-                    .filter { it.isNotEmpty() }
-                    .joinToString(", ")
+                style = MaterialTheme.typography.bodyLarge,
+                text = if (name.isNotBlank()) "$name ($nameEn)" else nameEn
             )
             Text(
-                listOf(nameEn, regionName, countryNameEn)
-                    .filter { it.isNotEmpty() }
+                style = MaterialTheme.typography.bodyMedium,
+                text = listOf(regionName, countryNameEn)
+                    .filter { it.isNotBlank() }
                     .joinToString(", ")
             )
         }
