@@ -8,14 +8,32 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import kotlinx.serialization.Serializable
+import me.alexy.hipipl.feature.hostme.HostListByLocation
+import me.alexy.hipipl.feature.hostme.ui.HostListByLocationScreen
 import me.alexy.hipipl.feature.hostme.ui.LocationSearchScreen
+
+@Serializable
+object LocationSearch
+
 
 @Composable
 fun MainNavigation() {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "main") {
-        composable("main") { LocationSearchScreen(modifier = Modifier.padding(16.dp)) }
-        // TODO: Add more destinations
+    NavHost(
+        modifier = Modifier.padding(16.dp),
+        navController = navController,
+        startDestination = LocationSearch
+    ) {
+        composable<LocationSearch> {
+            LocationSearchScreen() {
+                id, name -> navController.navigate(route = HostListByLocation(id, name))
+            }
+        }
+        composable<HostListByLocation> { backStackEntry ->
+            HostListByLocationScreen()
+        }
     }
 }
+

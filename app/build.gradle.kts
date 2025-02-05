@@ -7,6 +7,8 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.kotlin.serialization)
+
 }
 
 android {
@@ -64,6 +66,7 @@ android {
 
 dependencies {
     implementation(project(":core:ui"))
+    implementation(project(":core:model"))
     implementation(project(":feature:hostme"))
 
     // Core Android dependencies
@@ -80,6 +83,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.kotlinx.serialization.json)
 
     // Compose
     val composeBom = platform(libs.androidx.compose.bom)

@@ -19,6 +19,7 @@ data class HostUser(
 
 data class UserLanguage(
     val langCode: String,
+    val langName: String,
     val level: Int,
 )
 
@@ -28,6 +29,7 @@ data class HostDetails(
     val correct: Int,
     val city: String,
     val dist: Int,
+    val direction: String,
     val date: LocalDateTime,
     val separateRoom: Boolean,
     val allowKids: Boolean,

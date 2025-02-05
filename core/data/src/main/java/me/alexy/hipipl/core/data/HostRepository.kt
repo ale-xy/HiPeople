@@ -4,24 +4,25 @@ import com.hippl.model.ContactType
 import com.hippl.model.Gender
 import com.hippl.model.HostDetails
 import com.hippl.model.HostUser
-import com.hippl.model.Location
 import com.hippl.model.UserLanguage
 import com.hippl.network.NetworkDataSource
 import com.hippl.network.model.NetworkContacts
 import com.hippl.network.model.NetworkHost
 import com.hippl.network.model.NetworkHostUser
+import com.hippl.network.model.NetworkUserLang
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 interface HostRepository {
-    suspend fun getHostForLocation(location: Location): List<HostUser>
+    suspend fun getHostForLocation(locationId: Int): List<HostUser>
 }
 
 class DefaultHostRepository @Inject constructor(
     private val dataSource: NetworkDataSource
 ) : HostRepository {
-    override suspend fun getHostForLocation(location: Location): List<HostUser> =
-        dataSource.getHostsForLocation(location.id).map { it.toHostUser() }
+    override suspend fun getHostForLocation(locationId: Int): List<HostUser> =
+        dataSource.getHostsForLocation(locationId).map { it.toHostUser() }
 }
 
 private fun NetworkHostUser.toHostUser() =
@@ -29,15 +30,15 @@ private fun NetworkHostUser.toHostUser() =
         userId = userId ?: throw IllegalArgumentException("User ID can't be null"),
         name = name.orEmpty(),
         gender = sex.toGender(),
-        age = age?.toInt().orZero(),
+        age = age.orZero(),
         description = descript.orEmpty(),
         totalReviews = totalReviews.orZero(),
         contacts = contacts?.toContactMap() ?: mapOf(),
         averageRating = averageRating ?: 0.0f,
-        photos = photos,
+        photos = photos?.filterNotNull() ?: listOf(),
         donate = donate.orZero(),
         userLanguages =
-            userLangs?.let { listOf(UserLanguage(it, 0)) } ?: listOf(), //todo
+            userLangs?.map { it.toUserLanguage() } ?: listOf(),
         host =
             hostId?.let { host?.toHostDetails(it) }
                 ?: throw IllegalArgumentException("Host ID can't be null"),
@@ -57,10 +58,19 @@ private fun NetworkContacts.toContactMap(): Map<ContactType, String> {
     vk?.let { contactMap[ContactType.VK] = it.toString() }
     tg?.let { contactMap[ContactType.TELEGRAM] = it }
     tel?.let { contactMap[ContactType.PHONE] = it }
-    fb?.let { contactMap[ContactType.FACEBOOK] = it }
+    fb?.let { contactMap[ContactType.FACEBOOK] = it.toString() }
     extra?.let { contactMap[ContactType.OTHER] = it }
     return contactMap.toMap()
 }
+
+private fun NetworkUserLang.toUserLanguage() =
+    UserLanguage(
+        langCode = code,
+        langName = name,
+        level = lvl
+    )
+
+private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
 private fun NetworkHost.toHostDetails(id: Int) =
     HostDetails(
@@ -69,8 +79,9 @@ private fun NetworkHost.toHostDetails(id: Int) =
         correct = correct.orZero(),
         city = city.orEmpty(),
         dist = dist.orZero(),
+        direction = degree.orEmpty(),
         separateRoom = separate == 1,
         allowKids = kid == 1,
         gender = gender.toGender(),
-        date = LocalDateTime.parse(text)
+        date = LocalDateTime.parse(date, dateTimeFormatter)
     )

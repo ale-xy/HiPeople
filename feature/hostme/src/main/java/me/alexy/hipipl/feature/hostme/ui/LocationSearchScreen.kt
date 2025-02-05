@@ -1,6 +1,7 @@
 
 package me.alexy.hipipl.feature.hostme.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.hippl.model.Location
@@ -33,8 +35,9 @@ import me.alexy.hipipl.feature.hostitem.R
 
 @Composable
 fun LocationSearchScreen(
-    modifier: Modifier,
-    viewModel: LocationSearchViewModel = hiltViewModel()
+    modifier: Modifier = Modifier,
+    viewModel: LocationSearchViewModel = hiltViewModel(),
+    onNavigateToHostList: (Int, String) -> Unit
 ) {
     val searchText by viewModel.searchText.collectAsState()
     val searchExpanded by viewModel.searchExpanded.collectAsState()
@@ -46,6 +49,7 @@ fun LocationSearchScreen(
         locationList,
         { viewModel.onSearchTextChange(it) },
         { viewModel.onSearch() },
+        onNavigateToHostList
     )
 }
 
@@ -57,7 +61,8 @@ fun LocationSearchScreen(
     searchExpanded: Boolean,
     locationList: List<Location>,
     onSearchTextChange: (String) -> Unit,
-    onSearch: () -> Unit
+    onSearch: () -> Unit,
+    onNavigateToHostList: (Int, String) -> Unit
 ) {
     Scaffold(
         modifier = modifier,
@@ -70,6 +75,8 @@ fun LocationSearchScreen(
                 verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {
                 Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.headlineMedium,
                     text = stringResource(R.string.host_search)
                 )
@@ -111,11 +118,9 @@ fun LocationSearchScreen(
                         ) {
                             items(
                                 count = locationList.size,
-                                key = { index ->
-                                    locationList[index].id
-                                },
+                                key = { index -> locationList[index].id },
                                 itemContent = { index ->
-                                    LocationListItem(locationList[index])
+                                    LocationListItem(locationList[index], onNavigateToHostList)
                                 }
                             )
                         }
@@ -135,12 +140,21 @@ fun LocationSearchScreen(
 }
 
 @Composable
-fun LocationListItem(location: Location) {
-    Column {
+fun LocationListItem(location: Location, onClick: (Int, String) -> Unit) {
+    val locationName =
+        if (location.name.isNotBlank()) {
+            "${location.name} (${location.nameEn})"
+        } else {
+            location.nameEn
+        }
+
+    Column(
+        modifier = Modifier.clickable { onClick(location.id, locationName) }
+    ) {
         with(location) {
             Text(
                 style = MaterialTheme.typography.bodyLarge,
-                text = if (name.isNotBlank()) "$name ($nameEn)" else nameEn
+                text = locationName
             )
             Text(
                 style = MaterialTheme.typography.bodyMedium,
