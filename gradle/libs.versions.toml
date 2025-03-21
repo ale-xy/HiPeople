@@ -12,6 +12,7 @@ androidxTestExt = "1.2.1"
 androidxTestRunner = "1.6.2"
 coilCompose = "3.1.0"
 coilNetworkOkhttp = "3.1.0"
+githubTextflowMaterial3 = "1.2.1"
 coroutines = "1.10.1"
 desugar_jdk_libs = "2.1.4"
 hilt = "2.55"
@@ -51,6 +52,7 @@ androidx-test-runner = { module = "androidx.test:runner", version.ref = "android
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilNetworkOkhttp" }
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
+github-textflow-material3 = { module = "io.github.oleksandrbalan:textflow-material3", version.ref = "githubTextflowMaterial3" }
 hilt-core = { module = "com.google.dagger:hilt-core", version.ref = "hilt" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }

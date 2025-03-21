@@ -38,9 +38,9 @@ data class HostDetails(
 
 enum class ContactType {
     VK,
-    PHONE,
     TELEGRAM,
     FACEBOOK,
+    PHONE,
     OTHER
 }
 

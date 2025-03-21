@@ -31,6 +31,7 @@ internal object NetworkModule {
         ignoreUnknownKeys = true
         coerceInputValues = true
         prettyPrint = true
+        isLenient = true
     }
 
     @Provides

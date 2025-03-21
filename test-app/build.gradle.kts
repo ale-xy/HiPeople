@@ -27,7 +27,7 @@ android {
     targetProjectPath = ":app"
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 24
         targetSdk = 35
 
         testInstrumentationRunner = "me.alexy.hipipl.core.testing.HiltTestRunner"

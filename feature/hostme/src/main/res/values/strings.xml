@@ -6,4 +6,12 @@
     <string name="host_list_in_city">Хосты в городе %s</string>
     <string name="age_format">%s лет</string>
     <string name="distance_km_format">%s км</string>
+    <string name="rating_format">Рейтинг: %s</string>
+    <string name="donation_format">Сделал донат %d</string>
+    <string name="about_me">Обо мне:</string>
+    <string name="reviews_header">Отзывы:</string>
+    <string name="no_reviews">Отзывов нет</string>
+    <string name="lang_format">Языки: %s</string>
+    <string name="contacts_header">Контакты:</string>
+
 </resources>

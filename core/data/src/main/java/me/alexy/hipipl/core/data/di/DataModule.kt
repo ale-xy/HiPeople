@@ -27,13 +27,3 @@ interface DataModule {
         geoRepository: DefaultGeoRepository
     ): GeoRepository
 }
-
-//class FakeHostRepository @Inject constructor() : HostRepository {
-//    override val hostItems: Flow<List<String>> = flowOf(fakeHostItems)
-//
-//    override suspend fun add(name: String) {
-//        throw NotImplementedError()
-//    }
-//}
-
-//val fakeHostItems = listOf("One", "Two", "Three")

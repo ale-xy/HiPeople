@@ -4,11 +4,16 @@ import com.hippl.model.ContactType
 import com.hippl.model.Gender
 import com.hippl.model.HostDetails
 import com.hippl.model.HostUser
+import com.hippl.model.MutualReview
+import com.hippl.model.Review
+import com.hippl.model.ReviewType
 import com.hippl.model.UserLanguage
 import com.hippl.network.NetworkDataSource
 import com.hippl.network.model.NetworkContacts
 import com.hippl.network.model.NetworkHost
 import com.hippl.network.model.NetworkHostUser
+import com.hippl.network.model.NetworkMutualReview
+import com.hippl.network.model.NetworkReview
 import com.hippl.network.model.NetworkUserLang
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -16,6 +21,8 @@ import javax.inject.Inject
 
 interface HostRepository {
     suspend fun getHostForLocation(locationId: Int): List<HostUser>
+    suspend fun getHost(hostId: Int): HostUser
+    suspend fun getReviews(hostId: Int): List<MutualReview>
 }
 
 class DefaultHostRepository @Inject constructor(
@@ -23,6 +30,12 @@ class DefaultHostRepository @Inject constructor(
 ) : HostRepository {
     override suspend fun getHostForLocation(locationId: Int): List<HostUser> =
         dataSource.getHostsForLocation(locationId).map { it.toHostUser() }
+
+    override suspend fun getHost(hostId: Int): HostUser =
+        dataSource.getHost(hostId).toHostUser()
+
+    override suspend fun getReviews(hostId: Int): List<MutualReview> =
+        dataSource.getReviews(hostId).map { it.toMutualReview() }
 }
 
 private fun NetworkHostUser.toHostUser() =
@@ -83,5 +96,34 @@ private fun NetworkHost.toHostDetails(id: Int) =
         separateRoom = separate == 1,
         allowKids = kid == 1,
         gender = gender.toGender(),
-        date = LocalDateTime.parse(date, dateTimeFormatter)
+        date = date?.let { LocalDateTime.parse(date, dateTimeFormatter) } ?: LocalDateTime.now()
     )
+
+private fun NetworkMutualReview.toMutualReview(): MutualReview {
+    return MutualReview(
+        review = rec?.toReview(),
+        response = ans?.toReview()
+    )
+}
+
+private fun NetworkReview.toReview(): Review {
+    return Review(
+        id = id,
+        receiverId = receiverId,
+        authorId = authorId,
+        authorName = authorName,
+        date = LocalDateTime.parse(date, dateTimeFormatter),
+        text = text,
+        photo = if (photo.isNullOrBlank()) null else photo,
+        type = type.toReviewType(),
+        mutal = mutal ?: 0
+    )
+}
+
+private fun String.toReviewType(): ReviewType {
+    return when (this.uppercase()) {
+        "GUEST" -> ReviewType.GUEST
+        "HOST" -> ReviewType.HOST
+        else -> ReviewType.UNKNOWN
+    }
+}

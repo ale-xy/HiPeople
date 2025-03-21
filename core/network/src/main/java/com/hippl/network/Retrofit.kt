@@ -2,6 +2,7 @@ package com.hippl.network
 
 import com.hippl.network.model.NetworkGeoName
 import com.hippl.network.model.NetworkHostUser
+import com.hippl.network.model.NetworkMutualReview
 import kotlinx.serialization.json.Json
 import okhttp3.Call
 import okhttp3.MediaType.Companion.toMediaType
@@ -21,10 +22,26 @@ private interface RetrofitNetworkApi {
         @Query("id") locationId: Int,
         @Query("user") userId: Int,
         @Query("token") token: String,
-    ) : List<NetworkHostUser>
+    ): List<NetworkHostUser>
+
+    @GET(value = "couchbot.php?method=get_host")
+    suspend fun getHost(
+        @Query("host") hostId: Int,
+        @Query("user") userId: Int,
+        @Query("token") token: String,
+    ): NetworkHostUser
+
+
+    @GET(value = "couchbot.php?method=get_rev")
+    suspend fun getReviews(
+        @Query("id") hostId: Int,
+        @Query("user") userId: Int,
+        @Query("token") token: String,
+    ):  List<NetworkMutualReview>
 }
 
 private const val BACKEND_URL = "https://hipipl.com/"
+//private const val BACKEND_URL = "http://10.0.2.2:3001/"
 
 @Singleton
 internal class RetrofitDataSource @Inject constructor(
@@ -48,4 +65,14 @@ internal class RetrofitDataSource @Inject constructor(
     override suspend fun getHostsForLocation(locationId: Int): List<NetworkHostUser> =
         //todo replace parameters
         networkApi.getHostsForLocation(locationId, 1, "12345")
+
+    override suspend fun getHost(hostId: Int): NetworkHostUser =
+        //todo replace parameters
+        networkApi.getHost(hostId, 1, "12345")
+
+    override suspend fun getReviews(hostId: Int): List<NetworkMutualReview> =
+        networkApi.getReviews(hostId, 1, "12345")
+
+
+
 }
