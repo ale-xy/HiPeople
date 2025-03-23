@@ -34,7 +34,7 @@ class HostDetailsViewModel @Inject constructor(
 
     init {
         loadHostDetails(args.hostId)
-        loadReviews(args.hostId)
+        loadReviews(args.userId)
         combineUiState()
     }
 
@@ -69,7 +69,7 @@ class HostDetailsViewModel @Inject constructor(
             combine(_hostState, _reviewsState) { hostState, reviewsState ->
                 when {
                     // Both are loading
-                    hostState is HostState.Loading && reviewsState is ReviewsState.Loading ->
+                    hostState is HostState.Loading ->
                         HostDetailsUiState.Loading
 
                     // Host details are loaded, but reviews are still loading

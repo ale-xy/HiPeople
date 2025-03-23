@@ -19,7 +19,7 @@ android {
         applicationId = "me.alexy.hipipl"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
+        versionCode = 2
         versionName = "0.$versionCode"
 
         vectorDrawables {
@@ -37,6 +37,16 @@ android {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
+    }
+
+    applicationVariants.all {
+        val variant = this
+        variant.outputs
+            .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
+             .forEach { output ->
+                val outputFileName = "$applicationId-${variant.buildType.name}-${variant.versionName}.apk"
+                output.outputFileName = outputFileName
+            }
     }
 
     compileOptions {
@@ -57,7 +67,7 @@ android {
         shaders = false
     }
 
-    packagingOptions {
+    packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }

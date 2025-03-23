@@ -16,7 +16,7 @@ data class HostListByLocation(val locationId: Int, val locationName: String) {
 }
 
 @Serializable
-data class HostDetails(val hostId: Int) {
+data class HostDetails(val hostId: Int, val userId: Int) {
     companion object {
         fun from(savedStateHandle: SavedStateHandle) =
             savedStateHandle.toRoute<HostDetails>()

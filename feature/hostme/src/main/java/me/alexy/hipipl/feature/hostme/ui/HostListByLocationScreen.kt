@@ -41,7 +41,7 @@ import java.time.LocalDateTime
 fun HostListByLocationScreen(
     modifier: Modifier = Modifier,
     viewModel: HostListForLocationViewModel = hiltViewModel(),
-    onNavigateToHostDetails: (Int) -> Unit
+    onNavigateToHostDetails: (Int, Int) -> Unit
 ) {
     val uiState = viewModel.uiState.collectAsState()
 
@@ -58,7 +58,7 @@ fun HostListByLocationScreen(
     locationName: String,
     modifier: Modifier = Modifier,
     uiState: HostListUiState,
-    onNavigateToHostDetails: (Int) -> Unit,
+    onNavigateToHostDetails: (Int, Int) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -108,12 +108,12 @@ fun HostListByLocationScreen(
 @Composable
 fun HostListItem(
     hostUser: HostUser,
-    onNavigateToHostDetails: (Int) -> Unit,
+    onNavigateToHostDetails: (Int, Int) -> Unit,
 ) {
     with(hostUser) {
         Row(
             modifier = Modifier
-                .clickable { onNavigateToHostDetails(host.hostId) }
+                .clickable { onNavigateToHostDetails(host.hostId, userId) }
                 .fillMaxWidth()
                 .background(color = LightGreen, shape = RoundedCornerShape(12.dp))
                 .padding(12.dp),
@@ -178,7 +178,7 @@ fun HostListItem(
 fun HostListItemPreview() {
     MaterialTheme {
         HostListItem(
-            onNavigateToHostDetails = {},
+            onNavigateToHostDetails = { _, _ -> Unit },
             hostUser = HostUser(
                 userId = 1,
                 name = "Alex",

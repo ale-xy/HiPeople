@@ -83,11 +83,23 @@ fun HostDetailsScreen(
                     .verticalScroll(rememberScrollState())
             ) {
                 HostDetails(uiState.hostDetails)
-                CircularProgressIndicator(
-                    Modifier
-                        .padding(10.dp)
-                        .align(Alignment.CenterHorizontally)
+
+                Text(
+                    style = MaterialTheme.typography.titleLarge,
+                    text = stringResource(R.string.reviews_header)
                 )
+                
+                when (uiState.reviewsError) {
+                    null ->
+                        CircularProgressIndicator(
+                            Modifier
+                                .padding(10.dp)
+                                .align(Alignment.CenterHorizontally)
+                        )
+                    else -> {
+                        Text(uiState.reviewsError)
+                    }
+                }
             }
         }
 

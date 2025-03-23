@@ -34,7 +34,7 @@ fun MainNavigation(modifier: Modifier) {
         }
         composable<HostListByLocation> {
             HostListByLocationScreen {
-                id -> navController.navigate(route = HostDetails(id))
+                id, userId -> navController.navigate(route = HostDetails(id, userId))
             }
         }
         composable<HostDetails> {
