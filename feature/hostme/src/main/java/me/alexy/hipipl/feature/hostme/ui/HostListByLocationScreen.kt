@@ -32,6 +32,7 @@ import com.hippl.model.ContactType
 import com.hippl.model.Gender
 import com.hippl.model.HostDetails
 import com.hippl.model.HostUser
+import com.hippl.model.Photo
 import com.hippl.model.UserLanguage
 import me.alexy.hipipl.core.ui.LightGreen
 import me.alexy.hipipl.feature.hostitem.R
@@ -124,7 +125,7 @@ fun HostListItem(
 
             AsyncImage(
                 modifier = Modifier.size(120.dp),
-                model = photos.firstOrNull(),
+                model = photos.firstOrNull()?.url,
                 alignment = Alignment.Center,
                 contentScale = ContentScale.Crop,
                 placeholder = placeholder,
@@ -188,7 +189,7 @@ fun HostListItemPreview() {
                 totalReviews = 10,
                 contacts = mapOf(ContactType.TELEGRAM to "@telegram_id"),
                 averageRating = 4.5f,
-                photos = listOf("https://example.com/image.jpg"),
+                photos = listOf(Photo(1, "https://example.com/image.jpg")),
                 donate = 0,
                 userLanguages = listOf(UserLanguage("en", "English", 100)),
                 host = HostDetails(

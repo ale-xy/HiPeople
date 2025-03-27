@@ -14,17 +14,17 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 private interface RetrofitNetworkApi {
-    @GET(value = "couchbot.php?method=get_geo_name")
+    @GET(value = "$BACKEND_BASE?method=get_geo_name")
     suspend fun getGeoName(@Query("name") name: String): List<NetworkGeoName>
 
-    @GET(value = "couchbot.php?method=get_hosts_city")
+    @GET(value = "$BACKEND_BASE?method=get_hosts_city")
     suspend fun getHostsForLocation(
         @Query("id") locationId: Int,
         @Query("user") userId: Int,
         @Query("token") token: String,
     ): List<NetworkHostUser>
 
-    @GET(value = "couchbot.php?method=get_host")
+    @GET(value = "$BACKEND_BASE?method=get_host")
     suspend fun getHost(
         @Query("host") hostId: Int,
         @Query("user") userId: Int,
@@ -32,7 +32,7 @@ private interface RetrofitNetworkApi {
     ): NetworkHostUser
 
 
-    @GET(value = "couchbot.php?method=get_rev")
+    @GET(value = "$BACKEND_BASE?method=get_rev")
     suspend fun getReviews(
         @Query("id") hostId: Int,
         @Query("user") userId: Int,
@@ -42,6 +42,9 @@ private interface RetrofitNetworkApi {
 
 private const val BACKEND_URL = "https://hipipl.com/"
 //private const val BACKEND_URL = "http://10.0.2.2:3001/"
+
+//private const val BACKEND_BASE = "couchbot.php"
+private const val BACKEND_BASE = "api.php"
 
 @Singleton
 internal class RetrofitDataSource @Inject constructor(

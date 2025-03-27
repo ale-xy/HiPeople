@@ -158,7 +158,7 @@ fun HostDetails(
                 modifier = Modifier
                     .aspectRatio(1.0f)
                     .fillMaxWidth(),
-                model = photos[page],
+                model = photos[page].url,
                 alignment = Alignment.Center,
                 contentScale = ContentScale.Crop,
                 placeholder = placeholder,

@@ -5,6 +5,7 @@ import com.hippl.model.Gender
 import com.hippl.model.HostDetails
 import com.hippl.model.HostUser
 import com.hippl.model.MutualReview
+import com.hippl.model.Photo
 import com.hippl.model.Review
 import com.hippl.model.ReviewType
 import com.hippl.model.UserLanguage
@@ -13,6 +14,7 @@ import com.hippl.network.model.NetworkContacts
 import com.hippl.network.model.NetworkHost
 import com.hippl.network.model.NetworkHostUser
 import com.hippl.network.model.NetworkMutualReview
+import com.hippl.network.model.NetworkPhoto
 import com.hippl.network.model.NetworkReview
 import com.hippl.network.model.NetworkUserLang
 import java.time.LocalDateTime
@@ -48,7 +50,7 @@ private fun NetworkHostUser.toHostUser() =
         totalReviews = totalReviews.orZero(),
         contacts = contacts?.toContactMap() ?: mapOf(),
         averageRating = averageRating ?: 0.0f,
-        photos = photos?.filterNotNull() ?: listOf(),
+        photos = photos?.filterNotNull()?.map { it.toPhoto() } ?: listOf(),
         donate = donate.orZero(),
         userLanguages =
             userLangs?.map { it.toUserLanguage() } ?: listOf(),
@@ -98,6 +100,9 @@ private fun NetworkHost.toHostDetails(id: Int) =
         gender = gender.toGender(),
         date = date?.let { LocalDateTime.parse(date, dateTimeFormatter) } ?: LocalDateTime.now()
     )
+
+//private fun NetworkPhoto.toPhoto() = Photo(id = id, url = url)
+private fun NetworkPhoto.toPhoto() = Photo(id = -1, url = this)
 
 private fun NetworkMutualReview.toMutualReview(): MutualReview {
     return MutualReview(

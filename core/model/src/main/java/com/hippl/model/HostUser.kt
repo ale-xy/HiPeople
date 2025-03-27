@@ -11,7 +11,7 @@ data class HostUser(
     val totalReviews: Int,
     val contacts: Map<ContactType, String>,
     val averageRating: Float,
-    val photos: List<String>,
+    val photos: List<Photo>,
     val donate: Int,
     val userLanguages: List<UserLanguage>,
     val host: HostDetails,
@@ -34,6 +34,11 @@ data class HostDetails(
     val separateRoom: Boolean,
     val allowKids: Boolean,
     val gender: Gender
+)
+
+data class Photo(
+    val id: Int,
+    val url: String
 )
 
 enum class ContactType {

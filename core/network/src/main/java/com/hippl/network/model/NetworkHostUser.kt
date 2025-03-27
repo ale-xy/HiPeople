@@ -15,7 +15,7 @@ data class NetworkHostUser(
     @SerialName("total_reviews") val totalReviews: Int? = null,
     val contacts: NetworkContacts? = NetworkContacts(),
     @SerialName("average_rating") val averageRating: Float? = null,
-    val photos: List<String?>? = null,
+    val photos: List<NetworkPhoto?>? = null,
     val donate: Int? = null,
     @SerialName("user_langs") val userLangs: List<NetworkUserLang>? = null,
     val host: NetworkHost? = NetworkHost()
@@ -27,3 +27,10 @@ data class NetworkUserLang(
     val code: String,
     val name: String,
 )
+
+typealias NetworkPhoto = String
+//@Serializable
+//data class NetworkPhoto(
+//    val id: Int,
+//    val url: String
+//)
