@@ -9,13 +9,13 @@ plugins {
 }
 
 android {
-    namespace = "me.alexy.hipipl.feature.hostitem"
+    namespace = "com.hipeople.feature.hostitem"
     compileSdk = 35
 
     defaultConfig {
         minSdk = 24
 
-        testInstrumentationRunner = "me.alexy.hipipl.core.testing.HiltTestRunner"
+        testInstrumentationRunner = "com.hipeople.core.testing.HiltTestRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
 
@@ -39,7 +39,6 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:data"))
     implementation(project(":core:ui"))
     implementation(project(":core:model"))
     androidTestImplementation(project(":core:testing"))

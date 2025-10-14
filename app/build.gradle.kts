@@ -8,15 +8,15 @@ plugins {
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.serialization)
-
+    alias(libs.plugins.vkid.manifest)
 }
 
 android {
-    namespace = "me.alexy.hipipl"
+    namespace = "com.hipeople"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "me.alexy.hipipl"
+        applicationId = "com.hipeople"
         minSdk = 24
         targetSdk = 35
         versionCode = 2
@@ -37,6 +37,9 @@ android {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
+        getByName("debug") {
+            applicationIdSuffix = ".debug"
+        }
     }
 
     applicationVariants.all {
@@ -44,7 +47,7 @@ android {
         variant.outputs
             .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
              .forEach { output ->
-                val outputFileName = "$applicationId-${variant.buildType.name}-${variant.versionName}.apk"
+                val outputFileName = "$applicationId-${variant.versionName}.apk"
                 output.outputFileName = outputFileName
             }
     }
@@ -77,7 +80,9 @@ android {
 dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:model"))
+    implementation(project(":core:network"))
     implementation(project(":feature:hostme"))
+    implementation(project(":feature:auth"))
 
     // Core Android dependencies
     implementation(libs.androidx.core.ktx)
@@ -107,4 +112,7 @@ dependencies {
     // Tooling
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     debugImplementation(libs.androidx.compose.ui.tooling)
+
+    implementation(libs.vkid)
 }
+

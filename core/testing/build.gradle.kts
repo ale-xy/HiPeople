@@ -22,7 +22,7 @@ plugins {
 }
 
 android {
-    namespace = "me.alexy.hipipl.core.testing"
+    namespace = "com.hipeople.core.testing"
     compileSdk = 35
 
     defaultConfig {

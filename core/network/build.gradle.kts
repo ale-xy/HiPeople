@@ -12,6 +12,8 @@ kotlin {
 }
 
 dependencies {
+    implementation(project(":core:model"))
+
     // Hilt Dependency Injection
     implementation(libs.hilt.core)
     kapt(libs.hilt.compiler)

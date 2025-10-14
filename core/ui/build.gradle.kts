@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "me.alexy.hipipl.core.ui"
+    namespace = "com.hipeople.core.ui"
     compileSdk = 35
 
     defaultConfig {

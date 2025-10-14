@@ -22,7 +22,7 @@ plugins {
 }
 
 android {
-    namespace = "me.alexy.hipipl.test.navigation"
+    namespace = "com.hipeople.test.navigation"
     compileSdk = 35
     targetProjectPath = ":app"
 
@@ -30,7 +30,7 @@ android {
         minSdk = 24
         targetSdk = 35
 
-        testInstrumentationRunner = "me.alexy.hipipl.core.testing.HiltTestRunner"
+        testInstrumentationRunner = "com.hipeople.core.testing.HiltTestRunner"
     }
 
     buildFeatures {
@@ -52,7 +52,6 @@ android {
 
 dependencies {
     implementation(project(":app"))
-    implementation(project(":core:data"))
     implementation(project(":core:testing"))
     implementation(project(":feature:hostme"))
 
