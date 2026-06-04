@@ -17,10 +17,7 @@ rootProject.name = "Hi People"
 
 include(":app")
 include(":core:data")
-include(":core:database")
-include(":core:testing")
+include(":core:domain")
+include(":core:presentation")
 include(":core:ui")
 include(":feature:hostme")
-include(":test-app")
-include(":core:model")
-include(":core:network")

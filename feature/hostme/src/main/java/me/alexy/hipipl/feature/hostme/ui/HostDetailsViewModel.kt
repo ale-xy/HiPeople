@@ -1,127 +1,137 @@
 package me.alexy.hipipl.feature.hostme.ui
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hippl.model.HostUser
-import com.hippl.model.MutualReview
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import me.alexy.hipipl.core.data.HostRepository
-import me.alexy.hipipl.feature.hostme.HostDetails
-import javax.inject.Inject
+import me.alexy.hipipl.core.domain.HostRemoteDataSource
+import me.alexy.hipipl.core.domain.onFailure
+import me.alexy.hipipl.core.domain.onSuccess
+import me.alexy.hipipl.core.presentation.UiText
+import me.alexy.hipipl.core.presentation.toUiText
+import me.alexy.hipipl.feature.hostme.HostDetailsRoute
 
-@HiltViewModel
-class HostDetailsViewModel @Inject constructor(
-    private val repository: HostRepository,
-    savedStateHandle: SavedStateHandle,
+data class HostDetailsState(
+    val isLoadingHost: Boolean = true,
+    val host: HostDetailsUi? = null,
+    val hostError: UiText? = null,
+    val isLoadingReviews: Boolean = true,
+    val reviews: List<MutualReviewUi> = emptyList(),
+    val reviewsError: UiText? = null
+)
+
+sealed interface HostDetailsAction {
+    // No actions yet - read-only screen
+}
+
+data class HostDetailsUi(
+    val userId: Int,
+    val name: String,
+    val photos: List<String>,
+    val languagesText: String,
+    val cityText: String,
+    val nameWithAge: String,  // "Alex (30 лет)" or just "Alex"
+    val ratingText: String,  // "4.5* (10)"
+    val donateAmount: Int,
+    val showDonation: Boolean,
+    val description: String,
+    val hostText: String,
+    val contacts: Map<String, String>,  // Already string keys instead of ContactType
+    val hasContacts: Boolean
+)
+
+data class MutualReviewUi(
+    val review: ReviewUi?,
+    val response: ReviewUi?
+)
+
+data class ReviewUi(
+    val id: Int,
+    val authorName: String,
+    val formattedDate: String,  // "dd.MM.yyyy"
+    val text: String,
+    val photoUrl: String?,
+    val isGuest: Boolean,
+    val receiverName: String?  // For responses: "to: {name}"
+)
+
+class HostDetailsViewModel(
+    private val hostDataSource: HostRemoteDataSource,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _hostState = MutableStateFlow<HostState>(HostState.Loading)
+    private val args = HostDetailsRoute.from(savedStateHandle)
 
-    private val _reviewsState = MutableStateFlow<ReviewsState>(ReviewsState.Loading)
-
-    private val _uiState = MutableStateFlow<HostDetailsUiState>(HostDetailsUiState.Loading)
-    val uiState: StateFlow<HostDetailsUiState> = _uiState.asStateFlow()
-
-    private val args = HostDetails.from(savedStateHandle)
+    private val _state = MutableStateFlow(HostDetailsState())
+    val state: StateFlow<HostDetailsState> = _state
 
     init {
-        loadHostDetails(args.hostId)
-        loadReviews(args.userId)
-        combineUiState()
+        loadHost()
+        loadReviews()
     }
 
-    private fun loadHostDetails(hostId: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _hostState.value = HostState.Loading
-            try {
-                val hostDetails = repository.getHost(hostId)
-                _hostState.value = HostState.Success(hostDetails)
-            } catch (e: Throwable) {
-                Log.e("HostDetailsViewModel", e.message, e)
-                _hostState.value = HostState.Error(e.message.orEmpty())
-            }
-        }
+    fun onAction(action: HostDetailsAction) {
+        // No actions yet
     }
 
-    private fun loadReviews(hostId: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _reviewsState.value = ReviewsState.Loading
-            try {
-                val reviews = repository.getReviews(hostId)
-                _reviewsState.value = ReviewsState.Success(reviews)
-            } catch (e: Throwable) {
-                Log.e("HostDetailsViewModel", e.message, e)
-                _reviewsState.value = ReviewsState.Error(e.message.orEmpty())
-            }
-        }
-    }
-
-    private fun combineUiState() {
+    private fun loadHost() {
         viewModelScope.launch {
-            combine(_hostState, _reviewsState) { hostState, reviewsState ->
-                when {
-                    // Both are loading
-                    hostState is HostState.Loading ->
-                        HostDetailsUiState.Loading
+            _state.update { it.copy(isLoadingHost = true, hostError = null) }
 
-                    // Host details are loaded, but reviews are still loading
-                    hostState is HostState.Success && reviewsState is ReviewsState.Loading ->
-                        HostDetailsUiState.HostLoadSuccess(hostState.hostDetails, null)
-
-                    // Host details are loaded, and reviews are loaded
-                    hostState is HostState.Success && reviewsState is ReviewsState.Success -> {
-                        val filteredReviews = filterReviews(reviewsState.reviews)
-                        HostDetailsUiState.Success(hostState.hostDetails, filteredReviews)
+            hostDataSource.getHost(
+                hostId = args.hostId,
+                userId = 1, // TODO: real auth
+                token = "12345" // TODO: real auth
+            )
+                .onSuccess { host ->
+                    _state.update {
+                        it.copy(
+                            host = host.toHostDetailsUi(),
+                            isLoadingHost = false
+                        )
                     }
-
-                    // Host details are loaded, but reviews failed
-                    hostState is HostState.Success && reviewsState is ReviewsState.Error ->
-                        HostDetailsUiState.HostLoadSuccess(hostState.hostDetails, reviewsState.error)
-
-                    // Host details failed, but reviews are loaded
-                    hostState is HostState.Error && reviewsState is ReviewsState.Success ->
-                        HostDetailsUiState.Error(hostState.error)
-
-                    // Both failed
-                    hostState is HostState.Error && reviewsState is ReviewsState.Error ->
-                        HostDetailsUiState.Error("Host details: ${hostState.error}, Reviews: ${reviewsState.error}")
-
-                    // Unknown state
-                    else -> HostDetailsUiState.Error("Unknown state")
                 }
-            }.collect { _uiState.value = it }
+                .onFailure { error ->
+                    _state.update {
+                        it.copy(
+                            host = null,
+                            isLoadingHost = false,
+                            hostError = error.toUiText()
+                        )
+                    }
+                }
         }
     }
 
-    private fun filterReviews(reviews: List<MutualReview>): List<MutualReview> {
-        // Add your filtering logic here
-        return reviews // Return filtered reviews
+    private fun loadReviews() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoadingReviews = true, reviewsError = null) }
+
+            hostDataSource.getReviews(
+                hostId = args.hostId,
+                userId = 1, // TODO: real auth
+                token = "12345" // TODO: real auth
+            )
+                .onSuccess { reviews ->
+                    _state.update {
+                        it.copy(
+                            reviews = reviews.map { review -> review.toMutualReviewUi() },
+                            isLoadingReviews = false
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    _state.update {
+                        it.copy(
+                            reviews = emptyList(),
+                            isLoadingReviews = false,
+                            reviewsError = error.toUiText()
+                        )
+                    }
+                }
+        }
     }
-}
-
-sealed interface HostDetailsUiState {
-    data object Loading : HostDetailsUiState
-    data class HostLoadSuccess(val hostDetails: HostUser, val reviewsError: String?) : HostDetailsUiState
-    data class Success(val hostDetails: HostUser, val reviews: List<MutualReview>) : HostDetailsUiState
-    data class Error(val error: String) : HostDetailsUiState
-}
-
-sealed interface HostState {
-    data object Loading : HostState
-    data class Success(val hostDetails: HostUser) : HostState
-    data class Error(val error: String) : HostState
-}
-
-sealed interface ReviewsState {
-    data object Loading : ReviewsState
-    data class Success(val reviews: List<MutualReview>) : ReviewsState
-    data class Error(val error: String) : ReviewsState
 }

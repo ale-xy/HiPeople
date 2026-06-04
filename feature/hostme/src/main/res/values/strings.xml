@@ -3,6 +3,7 @@
     <string name="host_search">Поиск хостов</string>
     <string name="enter_city">Напиши название города</string>
     <string name="nothing_found">Ничего не нашлось</string>
+    <string name="loading">Загрузка…</string>
     <string name="host_list_in_city">Хосты в городе %s</string>
     <string name="age_format">%s лет</string>
     <string name="distance_km_format">%s км</string>
@@ -13,5 +14,8 @@
     <string name="no_reviews">Отзывов нет</string>
     <string name="lang_format">Языки: %s</string>
     <string name="contacts_header">Контакты:</string>
+    <string name="host_photo_description">Host photo</string>
+    <string name="review_photo_description">Review photo</string>
+    <string name="copy_to_clipboard">Copy to clipboard</string>
 
 </resources>

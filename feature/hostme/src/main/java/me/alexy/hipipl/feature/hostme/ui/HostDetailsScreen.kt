@@ -16,9 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.MailOutline
@@ -27,7 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,77 +42,48 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
-import com.hippl.model.ContactType
-import com.hippl.model.HostUser
-import com.hippl.model.MutualReview
-import com.hippl.model.Review
-import eu.wewox.textflow.material3.TextFlow
-import eu.wewox.textflow.material3.TextFlowObstacleAlignment
+import me.alexy.hipipl.core.presentation.asString
+import me.alexy.hipipl.core.ui.Blue
+import me.alexy.hipipl.core.ui.LightGreen
+import me.alexy.hipipl.core.ui.LightPeach
+import me.alexy.hipipl.core.ui.Yellow
 import me.alexy.hipipl.feature.hostitem.R
-import java.time.format.DateTimeFormatter
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun HostDetailsScreen(
     modifier: Modifier = Modifier,
-    viewModel: HostDetailsViewModel = hiltViewModel()
+    viewModel: HostDetailsViewModel = koinViewModel()
 ) {
-    val uiState = viewModel.uiState.collectAsState()
-    HostDetailsScreen(modifier, uiState.value)
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    HostDetailsScreen(modifier, state)
 }
 
 @Composable
 fun HostDetailsScreen(
     modifier: Modifier = Modifier,
-    uiState: HostDetailsUiState
+    state: HostDetailsState
 ) {
-    when (uiState) {
-        is HostDetailsUiState.Loading -> {
+    when {
+        state.isLoadingHost -> {
             Box(Modifier.fillMaxSize()) {
                 CircularProgressIndicator(Modifier.align(Alignment.Center))
             }
         }
-
-        is HostDetailsUiState.HostLoadSuccess -> {
-            Column(
-                modifier = modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-            ) {
-                HostDetails(uiState.hostDetails)
-
-                Text(
-                    style = MaterialTheme.typography.titleLarge,
-                    text = stringResource(R.string.reviews_header)
-                )
-                
-                when (uiState.reviewsError) {
-                    null ->
-                        CircularProgressIndicator(
-                            Modifier
-                                .padding(10.dp)
-                                .align(Alignment.CenterHorizontally)
-                        )
-                    else -> {
-                        Text(uiState.reviewsError)
-                    }
-                }
-            }
-        }
-
-        is HostDetailsUiState.Error -> {
+        state.hostError != null -> {
             Box(Modifier.fillMaxSize()) {
-                Text(uiState.error)
+                Text(state.hostError.asString())
             }
         }
-        is HostDetailsUiState.Success -> {
+        state.host != null -> {
             LazyColumn(
-                modifier = modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 item {
-                    HostDetails(uiState.hostDetails)
+                    HostDetailsContent(state.host)
                 }
                 item {
                     Text(
@@ -122,80 +91,86 @@ fun HostDetailsScreen(
                         text = stringResource(R.string.reviews_header)
                     )
                 }
-                if (uiState.reviews.isNotEmpty()) {
-                    items(uiState.reviews.size) { index ->
-                        MutualReview(uiState.reviews[index])
+                
+                when {
+                    state.isLoadingReviews -> {
+                        item {
+                            CircularProgressIndicator(
+                                Modifier.padding(10.dp)
+                            )
+                        }
                     }
-                } else {
-                    item {
-                        Text(
-                            modifier = Modifier.padding(top = 6.dp, bottom = 6.dp),
-                            style = MaterialTheme.typography.bodyLarge,
-                            text = stringResource(R.string.no_reviews)
-                        )
+                    state.reviewsError != null -> {
+                        item {
+                            Text(state.reviewsError.asString())
+                        }
+                    }
+                    state.reviews.isNotEmpty() -> {
+                        items(state.reviews.size) { index ->
+                            MutualReviewItem(state.reviews[index])
+                        }
+                    }
+                    else -> {
+                        item {
+                            Text(
+                                modifier = Modifier.padding(top = 6.dp, bottom = 6.dp),
+                                style = MaterialTheme.typography.bodyLarge,
+                                text = stringResource(R.string.no_reviews)
+                            )
+                        }
                     }
                 }
             }
         }
-
     }
 }
 
 @Composable
-fun HostDetails(
-    host: HostUser
-) {
+fun HostDetailsContent(host: HostDetailsUi) {
     val placeholder = painterResource(me.alexy.hipipl.core.ui.R.drawable.avatar)
+    val pagerState = rememberPagerState(pageCount = { host.photos.size })
 
-    with(host) {
-        val pagerState = rememberPagerState(pageCount = { photos.size })
+    Column {
+        // Photo pager
+        if (host.photos.isNotEmpty()) {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxWidth()
+            ) { page ->
+                AsyncImage(
+                    modifier = Modifier
+                        .aspectRatio(1.0f)
+                        .fillMaxWidth(),
+                    model = host.photos[page],
+                    alignment = Alignment.Center,
+                    contentScale = ContentScale.Crop,
+                    placeholder = placeholder,
+                    error = placeholder,
+                    fallback = placeholder,
+                    contentDescription = stringResource(R.string.host_photo_description)
+                )
+            }
+        }
 
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.fillMaxWidth()
-        ) { page ->
-            AsyncImage(
-                modifier = Modifier
-                    .aspectRatio(1.0f)
-                    .fillMaxWidth(),
-                model = photos[page].url,
-                alignment = Alignment.Center,
-                contentScale = ContentScale.Crop,
-                placeholder = placeholder,
-                error = placeholder,
-                fallback = placeholder,
-                contentDescription = null
+        // Languages
+        if (host.languagesText.isNotBlank()) {
+            Text(
+                modifier = Modifier.padding(top = 10.dp),
+                text = stringResource(R.string.lang_format, host.languagesText)
             )
         }
-        // todo page indicator
 
-        // lang
-        val langString = userLanguages.joinToString(", ") { lang ->
-            "${lang.langName}: ${lang.level}"
-        }
-        if (langString.isNotBlank()) {
-            Text(stringResource(R.string.lang_format, langString))
-        }
-
-        // city
+        // City
         Text(
             modifier = Modifier.padding(top = 10.dp, bottom = 5.dp),
             style = MaterialTheme.typography.titleLarge,
-            text = this.host.city
+            text = host.cityText
         )
 
-        // age
-        val ageText = if (age > 0) {
-            " (${stringResource(R.string.age_format, age)})"
-        } else {
-            ""
-        }
-
-        // name
+        // Name with age
         val nameText = buildAnnotatedString {
-            append(name)
-            addStyle(SpanStyle(fontWeight = FontWeight.Bold), 0, name.length)
-            append(ageText)
+            append(host.nameWithAge)
+            addStyle(SpanStyle(fontWeight = FontWeight.Bold), 0, host.name.length)
         }
         Text(
             modifier = Modifier.padding(bottom = 5.dp),
@@ -203,143 +178,108 @@ fun HostDetails(
             text = nameText
         )
 
-        // rating
-        val rating = "$averageRating* ($totalReviews)"
-        val ratingString = stringResource(R.string.rating_format, rating)
-        val ratingIndex = ratingString.indexOf(rating)
+        // Rating
+        val ratingIndex = stringResource(R.string.rating_format, host.ratingText)
+            .indexOf(host.ratingText)
         val ratingText = buildAnnotatedString {
-            append(ratingString)
-            addStyle(
-                SpanStyle(fontWeight = FontWeight.Bold), ratingIndex, ratingIndex + rating.length
-            )
+            val fullText = stringResource(R.string.rating_format, host.ratingText)
+            append(fullText)
+            if (ratingIndex >= 0) {
+                addStyle(
+                    SpanStyle(fontWeight = FontWeight.Bold),
+                    ratingIndex,
+                    ratingIndex + host.ratingText.length
+                )
+            }
         }
         Text(
-            modifier = Modifier.background(Color(0xFFFFFF00)),
+            modifier = Modifier.background(Yellow),
             text = ratingText
         )
 
-        // donate
-        if (donate > 0) {
+        // Donation
+        if (host.showDonation) {
             Text(
                 modifier = Modifier
                     .padding(top = 3.dp, bottom = 3.dp)
-                    .background(Color(0xFFC4F9C6))
-                ,
-                text = stringResource(R.string.donation_format, donate)
+                    .background(LightGreen),
+                text = stringResource(R.string.donation_format, host.donateAmount)
             )
         }
 
-        // host description
-        Text(text = description)
-
-        // "about me" title
+        // Description
         Text(
-            modifier = Modifier.padding(top = 3.dp, bottom = 3.dp),
+            modifier = Modifier.padding(top = 6.dp),
+            text = host.description
+        )
+
+        // "About me" title
+        Text(
+            modifier = Modifier.padding(top = 10.dp, bottom = 3.dp),
             style = MaterialTheme.typography.titleMedium,
             text = stringResource(R.string.about_me)
         )
 
-        // user description
-        Text(text = this.host.text)
+        // Host text
+        Text(text = host.hostText)
 
-        if (contacts.isNotEmpty()) {
+        // Contacts
+        if (host.hasContacts) {
             Text(
                 modifier = Modifier.padding(top = 12.dp, bottom = 6.dp),
                 style = MaterialTheme.typography.titleLarge,
                 text = stringResource(R.string.contacts_header)
             )
-            Contacts(contacts)
+            ContactsList(contacts = host.contacts)
         }
     }
 }
 
 @Composable
-private fun ContactIcon(
-    type: ContactType,
-    modifier: Modifier,
-    description: String? = null
-) = Icon(
-        modifier = modifier,
-        imageVector = when(type) {
-            ContactType.PHONE -> Icons.Default.Call
-            ContactType.OTHER -> Icons.Default.MailOutline
-            ContactType.VK -> ImageVector.vectorResource(R.drawable.vk_logo)
-            ContactType.TELEGRAM -> ImageVector.vectorResource(R.drawable.telegram_logo)
-            ContactType.FACEBOOK -> ImageVector.vectorResource(R.drawable.facebook_logo)
-        },
-        tint = when(type) {
-            ContactType.PHONE, ContactType.OTHER -> Color(0xFF0077FF)
-            else -> Color.Unspecified
-        },
-        contentDescription = "${type.name} $description"
-    )
-
-private fun contactIntent(type: ContactType, id: String): Intent? =
-    when(type){
-        ContactType.VK ->
-            Intent(Intent.ACTION_VIEW, Uri.parse("https://vk.com/id$id"))
-        ContactType.PHONE ->
-            Intent(Intent.ACTION_DIAL, Uri.parse("tel:$id"))
-        ContactType.TELEGRAM ->
-            Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/$id"))
-        ContactType.FACEBOOK ->
-            Intent(Intent.ACTION_VIEW, Uri.parse("https://facebook.com/profile.php?id=$id"))
-        ContactType.OTHER -> null
-    }
-
-@Composable
-fun Contacts(contacts: Map<ContactType, String>) {
+fun ContactsList(contacts: Map<String, String>) {
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            contacts.entries
-                .filterNot { it.key == ContactType.OTHER }
-                .sortedBy { it.key }
-                .forEach { entry ->
-                    val intent = remember { contactIntent(entry.key, entry.value) }
-
-                    intent?.let {
-                        ContactIcon(
-                            modifier = Modifier
-                                .size(64.dp)
-                                .weight(1.0f)
-                                .clickable {
-                                    context.startActivity(it)
-                                },
-                            type = entry.key,
-                            description = entry.key.name,
-                        )
-                    }
-                }
-        }
-        contacts.entries.firstOrNull { it.key == ContactType.OTHER }?.let { entry ->
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        contacts.forEach { (type, value) ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 6.dp, bottom = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                val contactIntent = remember(type, value) {
+                    when (type) {
+                        "VK" -> Intent(Intent.ACTION_VIEW, Uri.parse("https://vk.com/id$value"))
+                        "Phone" -> Intent(Intent.ACTION_DIAL, Uri.parse("tel:$value"))
+                        "Telegram" -> Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/$value"))
+                        "Facebook" -> Intent(Intent.ACTION_VIEW, Uri.parse("https://facebook.com/profile.php?id=$value"))
+                        else -> null
+                    }
+                }
+
+                contactIntent?.let { intent ->
+                    ContactIconButton(
+                        type = type,
+                        onClick = { context.startActivity(intent) }
+                    )
+                }
+
                 Text(
-                    modifier = Modifier
-                        .weight(1.0f),
-                    text = entry.value
+                    modifier = Modifier.weight(1.0f),
+                    text = value
                 )
+
                 Icon(
                     modifier = Modifier
                         .size(48.dp)
                         .padding(8.dp)
                         .clickable {
-                            clipboardManager.setText(AnnotatedString(entry.value))
+                            clipboardManager.setText(AnnotatedString(value))
                         },
-                    tint = Color(0xFF0077FF),
+                    tint = Blue,
                     imageVector = ImageVector.vectorResource(R.drawable.content_copy),
-                    contentDescription = null
+                    contentDescription = stringResource(R.string.copy_to_clipboard)
                 )
             }
         }
@@ -347,86 +287,104 @@ fun Contacts(contacts: Map<ContactType, String>) {
 }
 
 @Composable
-fun MutualReview(mutualReview: MutualReview) {
-    with(mutualReview) {
-        Column {
-            review?.let {
-                Review(
-                    modifier = Modifier
-                        .background(color = Color(0xFFFFE4B5), shape = RoundedCornerShape(5.dp))
-                        .padding(6.dp),
-                    review = it
-                )
-            }
-            response?.let {
-                Review(
-                    modifier = Modifier
-                        .background(color = Color(0xFFC4F9C6), shape = RoundedCornerShape(5.dp))
-                        .padding(6.dp),
-                    review = it,
-                    receiverName = review?.authorName
-                )
-            }
-        }
-    }
-}
-
-private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-
-@Composable
-fun Review(
-    modifier: Modifier,
-    review: Review,
-    receiverName: String? = null
+private fun ContactIconButton(
+    type: String,
+    onClick: () -> Unit
 ) {
-    with(review) {
-        Column(modifier = modifier.fillMaxWidth()) {
-            Row(modifier = Modifier.fillMaxWidth()) {
+    val (icon, tint) = when (type) {
+        "Phone" -> Icons.Default.Call to Blue
+        "Other" -> Icons.Default.MailOutline to Blue
+        "VK" -> ImageVector.vectorResource(R.drawable.vk_logo) to Color.Unspecified
+        "Telegram" -> ImageVector.vectorResource(R.drawable.telegram_logo) to Color.Unspecified
+        "Facebook" -> ImageVector.vectorResource(R.drawable.facebook_logo) to Color.Unspecified
+        else -> return
+    }
 
-                // name
-                val name = if (receiverName != null) {
-                    authorName.split(" ").first() + " > " + receiverName
-                } else {
-                    authorName
-                }
-                Text(
-                    modifier = Modifier.weight(1.0f),
-                    fontWeight = FontWeight.Bold,
-                    text = name
-                )
+    Icon(
+        modifier = Modifier
+            .size(48.dp)
+            .padding(8.dp)
+            .clickable(onClick = onClick),
+        imageVector = icon,
+        tint = tint,
+        contentDescription = "$type contact"
+    )
+}
 
-                // date
-                Text(
-                    fontWeight = FontWeight.Bold,
-                    text = dateTimeFormatter.format(date)
-                )
-            }
+@Composable
+fun MutualReviewItem(mutualReview: MutualReviewUi) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        mutualReview.review?.let { review ->
+            ReviewCard(
+                review = review,
+                backgroundColor = LightPeach
+            )
+        }
+        mutualReview.response?.let { response ->
+            ReviewCard(
+                review = response,
+                backgroundColor = LightGreen
+            )
+        }
+    }
+}
 
-            Row(modifier = Modifier.fillMaxWidth()) {
-                // text & image
-                TextFlow(
-                    modifier = Modifier.weight(1.0f),
-                    text = text,
-                    obstacleAlignment = TextFlowObstacleAlignment.TopEnd,
-                    obstacleContent = {
-                        photo?.let {
-                            val placeholder =
-                                painterResource(me.alexy.hipipl.core.ui.R.drawable.avatar)
+@Composable
+fun ReviewCard(
+    review: ReviewUi,
+    backgroundColor: Color
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = backgroundColor, shape = RoundedCornerShape(5.dp))
+            .padding(6.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        // Author name + receiver if it's a response
+        val headerText = if (review.receiverName != null) {
+            "${review.authorName} → ${review.receiverName}"
+        } else {
+            review.authorName
+        }
+        
+        Text(
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            text = headerText
+        )
 
-                            AsyncImage(
-                                modifier = Modifier.size(120.dp),
-                                model = it,
-                                alignment = Alignment.Center,
-                                contentScale = ContentScale.Crop,
-                                placeholder = placeholder,
-                                error = placeholder,
-                                fallback = placeholder,
-                                contentDescription = null
-                            )
-                        }
-                    }
-                )
-            }
+        // Date and type
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                style = MaterialTheme.typography.bodySmall,
+                text = review.formattedDate
+            )
+            Text(
+                style = MaterialTheme.typography.bodySmall,
+                text = if (review.isGuest) "Guest" else "Host"
+            )
+        }
+
+        // Review text
+        Text(
+            style = MaterialTheme.typography.bodyMedium,
+            text = review.text
+        )
+
+        // Photo if available
+        review.photoUrl?.let { photoUrl ->
+            AsyncImage(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1.5f),
+                model = photoUrl,
+                contentScale = ContentScale.Crop,
+                contentDescription = stringResource(R.string.review_photo_description)
+            )
         }
     }
 }

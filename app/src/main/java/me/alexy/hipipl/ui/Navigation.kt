@@ -8,14 +8,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import me.alexy.hipipl.feature.hostme.HostDetails
-import me.alexy.hipipl.feature.hostme.HostListByLocation
-import me.alexy.hipipl.feature.hostme.LocationSearch
+import me.alexy.hipipl.feature.hostme.HostDetailsRoute
+import me.alexy.hipipl.feature.hostme.HostListByLocationRoute
+import me.alexy.hipipl.feature.hostme.LocationSearchRoute
 import me.alexy.hipipl.feature.hostme.ui.HostDetailsScreen
 import me.alexy.hipipl.feature.hostme.ui.HostListByLocationScreen
 import me.alexy.hipipl.feature.hostme.ui.LocationSearchScreen
-
-
 
 @Composable
 fun MainNavigation(modifier: Modifier) {
@@ -24,20 +22,23 @@ fun MainNavigation(modifier: Modifier) {
     NavHost(
         modifier = modifier.padding(16.dp),
         navController = navController,
-        startDestination = LocationSearch,
-//        startDestination = HostDetails(1813),
+        startDestination = LocationSearchRoute,
     ) {
-        composable<LocationSearch> {
-            LocationSearchScreen {
-                id, name -> navController.navigate(route = HostListByLocation(id, name))
-            }
+        composable<LocationSearchRoute> {
+            LocationSearchScreen(
+                onNavigateToHostList = { id: Int, name: String ->
+                    navController.navigate(route = HostListByLocationRoute(id, name))
+                }
+            )
         }
-        composable<HostListByLocation> {
-            HostListByLocationScreen {
-                id, userId -> navController.navigate(route = HostDetails(id, userId))
-            }
+        composable<HostListByLocationRoute> {
+            HostListByLocationScreen(
+                onNavigateToHostDetails = { hostId: Int, userId: Int ->
+                    navController.navigate(route = HostDetailsRoute(hostId, userId))
+                }
+            )
         }
-        composable<HostDetails> {
+        composable<HostDetailsRoute> {
             HostDetailsScreen()
         }
     }

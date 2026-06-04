@@ -22,54 +22,49 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.hippl.model.Location
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import me.alexy.hipipl.core.presentation.ObserveAsEvents
+import me.alexy.hipipl.core.presentation.asString
 import me.alexy.hipipl.feature.hostitem.R
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun LocationSearchScreen(
-    modifier: Modifier = Modifier,
-    viewModel: LocationSearchViewModel = hiltViewModel(),
-    onNavigateToHostList: (Int, String) -> Unit
+    onNavigateToHostList: (Int, String) -> Unit,
+    viewModel: LocationSearchViewModel = koinViewModel()
 ) {
-    val searchText by viewModel.searchText.collectAsState()
-    val searchExpanded by viewModel.searchExpanded.collectAsState()
-    val locationList by viewModel.locationList.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LocationSearchScreen(modifier,
-        searchText,
-        searchExpanded,
-        locationList,
-        { viewModel.onSearchTextChange(it) },
-        { viewModel.onSearch() },
-        onNavigateToHostList
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            is LocationSearchEvent.NavigateToHostList -> {
+                onNavigateToHostList(event.locationId, event.locationName)
+            }
+        }
+    }
+
+    LocationSearchScreen(
+        state = state,
+        onAction = viewModel::onAction
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocationSearchScreen(
-    modifier: Modifier,
-    searchText: String,
-    searchExpanded: Boolean,
-    locationList: List<Location>,
-    onSearchTextChange: (String) -> Unit,
-    onSearch: () -> Unit,
-    onNavigateToHostList: (Int, String) -> Unit
+    state: LocationSearchState,
+    onAction: (LocationSearchAction) -> Unit
 ) {
     Scaffold(
-        modifier = modifier,
         content = { padding ->
-
             Column(
-                modifier = modifier
+                modifier = Modifier
                     .padding(padding)
                     .fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(32.dp)
@@ -81,56 +76,82 @@ fun LocationSearchScreen(
                     text = stringResource(R.string.host_search)
                 )
 
-                val inputField =
-                    @Composable {
-                        SearchBarDefaults.InputField(
-                            query = searchText,
-                            onQueryChange = { onSearchTextChange(it) },
-                            expanded = !searchExpanded,
-                            onExpandedChange = { },
-                            modifier = Modifier,
-                            onSearch = { onSearch() },
-                            placeholder = { Text(stringResource(R.string.enter_city)) },
-                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                            trailingIcon = {
+                val inputField = @Composable {
+                    SearchBarDefaults.InputField(
+                        query = state.searchText,
+                        onQueryChange = { onAction(LocationSearchAction.OnSearchTextChange(it)) },
+                        expanded = !state.isSearchExpanded,
+                        onExpandedChange = { },
+                        modifier = Modifier,
+                        onSearch = { onAction(LocationSearchAction.OnSearch) },
+                        placeholder = { Text(stringResource(R.string.enter_city)) },
+                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                        trailingIcon = {
+                            if (state.searchText.isNotBlank()) {
                                 IconButton(
-                                    onClick = { onSearchTextChange("") }
+                                    onClick = { onAction(LocationSearchAction.OnClearSearch) }
                                 ) {
-                                    if (searchText.isNotBlank()) {
-                                        Icon(Icons.Default.Clear, contentDescription = null)
-                                    }
+                                    Icon(Icons.Default.Clear, contentDescription = null)
                                 }
-                            },
-                        )
-                    }
+                            }
+                        },
+                    )
+                }
 
                 DockedSearchBar(
-                    modifier = Modifier.padding(padding).fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     inputField = inputField,
-                    expanded = searchExpanded,
+                    expanded = state.isSearchExpanded,
                     onExpandedChange = { },
                 ) {
-                    if (locationList.isNotEmpty()) {
-                        LazyColumn(
-                            verticalArrangement = Arrangement.spacedBy(32.dp),
-                            contentPadding = PaddingValues(16.dp),
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            items(
-                                count = locationList.size,
-                                key = { index -> locationList[index].id },
-                                itemContent = { index ->
-                                    LocationListItem(locationList[index], onNavigateToHostList)
-                                }
-                            )
+                    when {
+                        state.isLoading -> {
+                            Box(Modifier.fillMaxSize()) {
+                                Text(
+                                    modifier = Modifier.align(Alignment.Center),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    text = stringResource(R.string.loading)
+                                )
+                            }
                         }
-                    } else {
-                        Box(Modifier.fillMaxSize()) {
-                            Text(
-                                modifier = Modifier.align(Alignment.Center),
-                                style = MaterialTheme.typography.bodyLarge,
-                                text = stringResource(R.string.nothing_found)
-                            )
+
+                        state.error != null -> {
+                            Box(Modifier.fillMaxSize()) {
+                                Text(
+                                    modifier = Modifier.align(Alignment.Center),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    text = state.error.asString()
+                                )
+                            }
+                        }
+
+                        state.locations.isNotEmpty() -> {
+                            LazyColumn(
+                                verticalArrangement = Arrangement.spacedBy(32.dp),
+                                contentPadding = PaddingValues(16.dp),
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                items(
+                                    count = state.locations.size,
+                                    key = { index -> state.locations[index].id },
+                                    itemContent = { index ->
+                                        LocationListItem(
+                                            location = state.locations[index],
+                                            onAction = onAction
+                                        )
+                                    }
+                                )
+                            }
+                        }
+
+                        else -> {
+                            Box(Modifier.fillMaxSize()) {
+                                Text(
+                                    modifier = Modifier.align(Alignment.Center),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    text = stringResource(R.string.nothing_found)
+                                )
+                            }
                         }
                     }
                 }
@@ -140,28 +161,22 @@ fun LocationSearchScreen(
 }
 
 @Composable
-fun LocationListItem(location: Location, onClick: (Int, String) -> Unit) {
-    val locationName =
-        if (location.name.isNotBlank()) {
-            "${location.name} (${location.nameEn})"
-        } else {
-            location.nameEn
-        }
-
+fun LocationListItem(
+    location: LocationUi,
+    onAction: (LocationSearchAction) -> Unit
+) {
     Column(
-        modifier = Modifier.clickable { onClick(location.id, locationName) }
-    ) {
-        with(location) {
-            Text(
-                style = MaterialTheme.typography.bodyLarge,
-                text = locationName
-            )
-            Text(
-                style = MaterialTheme.typography.bodyMedium,
-                text = listOf(regionName, countryNameEn)
-                    .filter { it.isNotBlank() }
-                    .joinToString(", ")
-            )
+        modifier = Modifier.clickable {
+            onAction(LocationSearchAction.OnLocationClick(location.id, location.displayName))
         }
+    ) {
+        Text(
+            style = MaterialTheme.typography.bodyLarge,
+            text = location.displayName
+        )
+        Text(
+            style = MaterialTheme.typography.bodyMedium,
+            text = location.regionLine
+        )
     }
 }

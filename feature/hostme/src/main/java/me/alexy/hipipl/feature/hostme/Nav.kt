@@ -5,20 +5,20 @@ import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
 
 @Serializable
-object LocationSearch
+object LocationSearchRoute
 
 @Serializable
-data class HostListByLocation(val locationId: Int, val locationName: String) {
+data class HostListByLocationRoute(val locationId: Int, val locationName: String) {
     companion object {
         fun from(savedStateHandle: SavedStateHandle) =
-            savedStateHandle.toRoute<HostListByLocation>()
+            savedStateHandle.toRoute<HostListByLocationRoute>()
     }
 }
 
 @Serializable
-data class HostDetails(val hostId: Int, val userId: Int) {
+data class HostDetailsRoute(val hostId: Int, val userId: Int) {
     companion object {
         fun from(savedStateHandle: SavedStateHandle) =
-            savedStateHandle.toRoute<HostDetails>()
+            savedStateHandle.toRoute<HostDetailsRoute>()
     }
 }
