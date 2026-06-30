@@ -2,6 +2,7 @@ package me.alexy.hipipl.core.data.mapper
 
 import me.alexy.hipipl.core.data.dto.ContactsDto
 import me.alexy.hipipl.core.data.dto.HostDto
+import me.alexy.hipipl.core.data.dto.HostListItemDto
 import me.alexy.hipipl.core.data.dto.HostUserDto
 import me.alexy.hipipl.core.data.dto.PhotoDto
 import me.alexy.hipipl.core.data.dto.UserLangDto
@@ -12,32 +13,72 @@ import me.alexy.hipipl.core.domain.HostUser
 import me.alexy.hipipl.core.domain.Photo
 import me.alexy.hipipl.core.domain.UserLanguage
 
+// Map HostUserDto (details endpoint) to HostUser
 fun HostUserDto.toHostUser(): HostUser? {
-    val userIdValue = userId ?: return null
-    val hostIdValue = hostId ?: return null
+    val userIdValue = id ?: return null
+    val hostData = host ?: return null
+    val hostIdValue = hostData.id ?: return null
 
     return HostUser(
         userId = userIdValue,
         name = name.orEmpty(),
-        gender = sex.toGender(),
+        gender = sex.toGenderFromString(),
         age = age ?: 0,
-        description = descript.orEmpty(),
+        description = about.orEmpty(),
         totalReviews = totalReviews ?: 0,
         contacts = contacts?.toContactMap() ?: mapOf(),
-        averageRating = averageRating ?: 0.0f,
-        photos = photos?.mapNotNull { it?.toPhoto() } ?: listOf(),
+        averageRating = rating ?: 0.0f,
+        photos = photos?.mapNotNull { it.toPhoto() } ?: listOf(),
         donate = donate ?: 0,
-        userLanguages = userLangs?.map { it.toUserLanguage() } ?: listOf(),
-        host = host?.toHostDetails(hostIdValue) ?: return null,
+        userLanguages = userLangs?.mapNotNull { it.toUserLanguage() } ?: listOf(),
+        host = hostData.toHostDetails(hostIdValue),
     )
 }
 
-private fun Int?.toGender(): Gender {
-    return when (this) {
-        1 -> Gender.FEMALE
-        2 -> Gender.MALE
+// Map HostListItemDto (list endpoint) to HostUser
+fun HostListItemDto.toHostUser(): HostUser? {
+    val userIdValue = id ?: return null
+
+    return HostUser(
+        userId = userIdValue,
+        name = name.orEmpty(),
+        gender = (sex ?: gender).toGenderFromString(),
+        age = age ?: 0,
+        description = "",
+        totalReviews = totalReviews ?: 0,
+        contacts = emptyMap(),
+        averageRating = rating?.toFloatOrNull() ?: 0.0f,
+        photos = photos?.mapNotNull { it.toPhoto() } ?: listOf(),
+        donate = 0,
+        userLanguages = emptyList(),
+        host = HostDetails(
+            hostId = userIdValue,
+            text = "",
+            correct = 0,
+            city = city.orEmpty(),
+            dist = distance?.toInt() ?: 0,
+            direction = direction.orEmpty(),
+            separateRoom = separate == "y",
+            allowKids = kids == "y",
+            gender = (sex ?: gender).toGenderFromString(),
+            date = null.parseApiDateTime()
+        ),
+    )
+}
+
+// Parse string gender "m"/"f"/"ppl" to Gender enum
+fun String?.toGenderFromString(): Gender {
+    return when (this?.lowercase()) {
+        "m" -> Gender.MALE
+        "f" -> Gender.FEMALE
+        "ppl" -> Gender.PEOPLE
         else -> Gender.UNKNOWN
     }
+}
+
+// Parse "y"/"n" to Boolean
+fun String?.toYesNo(): Boolean {
+    return this == "y"
 }
 
 private fun ContactsDto.toContactMap(): Map<ContactType, String> {
@@ -50,11 +91,14 @@ private fun ContactsDto.toContactMap(): Map<ContactType, String> {
     return contactMap.toMap()
 }
 
-private fun UserLangDto.toUserLanguage(): UserLanguage {
+private fun UserLangDto.toUserLanguage(): UserLanguage? {
+    val langName = name ?: return null
+    val langLevel = lvl ?: return null
+    
     return UserLanguage(
-        langCode = code,
-        langName = name,
-        level = lvl
+        langCode = code.orEmpty(),
+        langName = langName,
+        level = langLevel
     )
 }
 
@@ -62,17 +106,18 @@ private fun HostDto.toHostDetails(id: Int): HostDetails {
     return HostDetails(
         hostId = id,
         text = text.orEmpty(),
-        correct = correct ?: 0,
+        correct = if (accurate == true) 1 else 0,
         city = city.orEmpty(),
         dist = dist ?: 0,
         direction = degree.orEmpty(),
-        separateRoom = separate == 1,
-        allowKids = kid == 1,
-        gender = gender.toGender(),
+        separateRoom = separateRoom.toYesNo(),
+        allowKids = kidsAllowed.toYesNo(),
+        gender = gender.toGenderFromString(),
         date = date.parseApiDateTime()
     )
 }
 
-private fun PhotoDto.toPhoto(): Photo {
-    return Photo(id = -1, url = this)
+private fun PhotoDto.toPhoto(): Photo? {
+    val photoUrl = url ?: return null
+    return Photo(id = id ?: -1, url = photoUrl)
 }

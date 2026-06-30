@@ -5,17 +5,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class GeoNameDto(
-    val id: Int? = null,
-    @SerialName("or_name") val name: String? = null,
-    @SerialName("en_name") val nameEn: String? = null,
-    val search: String? = null,
-    val type: String? = null,
+    val type: String? = null,  // "city", "country", or "region"
+    val title: String? = null,  // Display name from v1 API
+    val subtitle: String? = null,  // Country context (e.g., "France")
     val lat: Float? = null,
     val lon: Float? = null,
-    val radius: Int? = null,
-    val region: Int? = null,
-    @SerialName("name_region") val regionName: String? = null,
-    val country: Int? = null,
-    @SerialName("or_name_country") val countryName: String? = null,
-    @SerialName("en_name_country") val countryNameEn: String? = null,
+    @SerialName("city_id") val cityId: Int? = null,
+    @SerialName("country_id") val countryId: Int? = null,
+    @SerialName("region_id") val regionId: Int? = null,
 )

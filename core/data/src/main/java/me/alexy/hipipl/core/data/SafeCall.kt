@@ -11,6 +11,8 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.SerializationException
+import me.alexy.hipipl.core.data.dto.ApiResponse
+import me.alexy.hipipl.core.data.dto.unwrap
 import me.alexy.hipipl.core.domain.DataError
 import me.alexy.hipipl.core.domain.Result
 import java.net.UnknownHostException
@@ -94,6 +96,49 @@ suspend inline fun <reified T> responseToResult(
         429 -> Result.Error(DataError.Network.TOO_MANY_REQUESTS)
         in 500..599 -> Result.Error(DataError.Network.SERVER_ERROR)
         else -> Result.Error(DataError.Network.UNKNOWN)
+    }
+}
+
+/**
+ * Helper for API v1 endpoints that return { success, data, error } envelope.
+ * Automatically unwraps the ApiResponse.
+ */
+suspend inline fun <reified Response : Any> HttpClient.getV1(
+    route: String,
+    queryParameters: Map<String, Any?> = mapOf()
+): Result<Response, DataError.Network> {
+    val envelopeResult = get<ApiResponse<Response>>(route, queryParameters)
+    return when (envelopeResult) {
+        is Result.Success -> envelopeResult.data.unwrap()
+        is Result.Error -> envelopeResult
+    }
+}
+
+/**
+ * Helper for API v1 POST endpoints that return { success, data, error } envelope.
+ */
+suspend inline fun <reified Request, reified Response : Any> HttpClient.postV1(
+    route: String,
+    body: Request
+): Result<Response, DataError.Network> {
+    val envelopeResult = post<Request, ApiResponse<Response>>(route, body)
+    return when (envelopeResult) {
+        is Result.Success -> envelopeResult.data.unwrap()
+        is Result.Error -> envelopeResult
+    }
+}
+
+/**
+ * Helper for API v1 DELETE endpoints that return { success, data, error } envelope.
+ */
+suspend inline fun <reified Response : Any> HttpClient.deleteV1(
+    route: String,
+    queryParameters: Map<String, Any?> = mapOf()
+): Result<Response, DataError.Network> {
+    val envelopeResult = delete<ApiResponse<Response>>(route, queryParameters)
+    return when (envelopeResult) {
+        is Result.Success -> envelopeResult.data.unwrap()
+        is Result.Error -> envelopeResult
     }
 }
 

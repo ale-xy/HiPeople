@@ -1,14 +1,16 @@
 package me.alexy.hipipl.core.data
 
 import io.ktor.client.HttpClient
+import me.alexy.hipipl.core.data.dto.HostListItemDto
 import me.alexy.hipipl.core.data.dto.HostUserDto
-import me.alexy.hipipl.core.data.dto.MutualReviewDto
+import me.alexy.hipipl.core.data.dto.HostsPageDto
+import me.alexy.hipipl.core.data.dto.UserReviewsResponseDto
 import me.alexy.hipipl.core.data.mapper.toHostUser
-import me.alexy.hipipl.core.data.mapper.toMutualReview
+import me.alexy.hipipl.core.data.mapper.toUserReviews
 import me.alexy.hipipl.core.domain.DataError
 import me.alexy.hipipl.core.domain.HostRemoteDataSource
 import me.alexy.hipipl.core.domain.HostUser
-import me.alexy.hipipl.core.domain.MutualReview
+import me.alexy.hipipl.core.domain.UserReviews
 import me.alexy.hipipl.core.domain.Result
 import me.alexy.hipipl.core.domain.map
 
@@ -16,43 +18,51 @@ class KtorHostDataSource(
     private val httpClient: HttpClient
 ) : HostRemoteDataSource {
 
-    // TODO: Replace with real auth from Phase 0/1 of IMPLEMENTATION_PLAN.md
+    // TODO: Replace with real auth from Phase 1 of IMPLEMENTATION_PLAN.md
     private companion object {
         const val TEMP_USER_ID = 1
-        const val TEMP_TOKEN = "12345"
     }
 
     override suspend fun getHostsForLocation(
         locationId: Int,
-        userId: Int,
-        token: String
+        locationType: String,
+        userId: Int?,
     ): Result<List<HostUser>, DataError.Network> {
-        return httpClient.get<List<HostUserDto>>(
-            route = "api.php",
-            queryParameters = mapOf(
-                "method" to "get_hosts_city",
-                "id" to locationId,
-                "user" to TEMP_USER_ID,
-                "token" to TEMP_TOKEN
-            )
-        ).map { dtos ->
-            dtos.mapNotNull { it.toHostUser() }
+        // Build query params based on location type (city_id, country_id, or region_id)
+        val locationParam = when (locationType) {
+            "city" -> "city_id"
+            "country" -> "country_id"
+            "region" -> "region_id"
+            else -> "city_id"
+        }
+        
+        val queryParams = mutableMapOf(
+            locationParam to locationId
+        )
+        
+        // Add optional user parameter (no token in v1)
+        userId?.let { queryParams["user"] = it }
+        
+        return httpClient.getV1<HostsPageDto>(
+            route = "api/v1/hosts",
+            queryParameters = queryParams
+        ).map { page ->
+            page.hosts.mapNotNull { it.toHostUser() }
         }
     }
 
     override suspend fun getHost(
         hostId: Int,
-        userId: Int,
-        token: String
+        userId: Int?,
     ): Result<HostUser, DataError.Network> {
-        val result = httpClient.get<HostUserDto>(
-            route = "api.php",
-            queryParameters = mapOf(
-                "method" to "get_host",
-                "host" to hostId,
-                "user" to TEMP_USER_ID,
-                "token" to TEMP_TOKEN
-            )
+        val queryParams = mutableMapOf<String, Any>()
+        
+        // Add optional user parameter (no token in v1)
+        userId?.let { queryParams["user"] = it }
+        
+        val result = httpClient.getV1<HostUserDto>(
+            route = "api/v1/hosts/$hostId",
+            queryParameters = queryParams
         )
         return when (result) {
             is Result.Success -> result.data.toHostUser()
@@ -64,20 +74,19 @@ class KtorHostDataSource(
     }
 
     override suspend fun getReviews(
-        hostId: Int,
         userId: Int,
-        token: String
-    ): Result<List<MutualReview>, DataError.Network> {
-        return httpClient.get<List<MutualReviewDto>>(
-            route = "api.php",
-            queryParameters = mapOf(
-                "method" to "get_rev",
-                "id" to hostId,
-                "user" to TEMP_USER_ID,
-                "token" to TEMP_TOKEN
-            )
-        ).map { dtos ->
-            dtos.map { it.toMutualReview() }
+        viewerId: Int?,
+    ): Result<UserReviews, DataError.Network> {
+        val queryParams = mutableMapOf<String, Any>()
+        
+        // Add optional viewer_id parameter (no token in v1)
+        viewerId?.let { queryParams["viewer_id"] = it }
+        
+        return httpClient.getV1<UserReviewsResponseDto>(
+            route = "api/v1/users/$userId/reviews",
+            queryParameters = queryParams
+        ).map { response ->
+            response.toUserReviews()
         }
     }
 }

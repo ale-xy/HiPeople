@@ -83,8 +83,8 @@ class HostListByLocationViewModel(
 
             hostDataSource.getHostsForLocation(
                 locationId = args.locationId,
-                userId = 1, // TODO: real auth
-                token = "12345" // TODO: real auth
+                locationType = args.locationType,
+                userId = null, // TODO: Phase 1 - real auth
             )
                 .onSuccess { hosts ->
                     _state.update {

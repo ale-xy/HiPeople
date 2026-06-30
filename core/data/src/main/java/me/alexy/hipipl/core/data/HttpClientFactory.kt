@@ -33,7 +33,7 @@ object HttpClientFactory {
                         println("Ktor: $message")
                     }
                 }
-                level = if (BuildConfig.DEBUG) LogLevel.HEADERS else LogLevel.NONE
+                level = if (BuildConfig.DEBUG) LogLevel.BODY else LogLevel.NONE
             }
 
             defaultRequest {

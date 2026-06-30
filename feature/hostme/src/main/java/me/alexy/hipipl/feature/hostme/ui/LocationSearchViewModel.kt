@@ -28,17 +28,18 @@ sealed interface LocationSearchAction {
     data class OnSearchTextChange(val text: String) : LocationSearchAction
     data object OnSearch : LocationSearchAction
     data object OnClearSearch : LocationSearchAction
-    data class OnLocationClick(val locationId: Int, val locationName: String) : LocationSearchAction
+    data class OnLocationClick(val locationId: Int, val locationName: String, val locationType: String) : LocationSearchAction
 }
 
 sealed interface LocationSearchEvent {
-    data class NavigateToHostList(val locationId: Int, val locationName: String) : LocationSearchEvent
+    data class NavigateToHostList(val locationId: Int, val locationName: String, val locationType: String) : LocationSearchEvent
 }
 
 data class LocationUi(
     val id: Int,
     val displayName: String,
-    val regionLine: String
+    val regionLine: String,
+    val type: String
 )
 
 class LocationSearchViewModel(
@@ -89,7 +90,8 @@ class LocationSearchViewModel(
                     _events.send(
                         LocationSearchEvent.NavigateToHostList(
                             locationId = action.locationId,
-                            locationName = action.locationName
+                            locationName = action.locationName,
+                            locationType = action.locationType
                         )
                     )
                 }

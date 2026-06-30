@@ -70,7 +70,6 @@ class HostDetailsViewModel(
 
     init {
         loadHost()
-        loadReviews()
     }
 
     fun onAction(action: HostDetailsAction) {
@@ -83,8 +82,7 @@ class HostDetailsViewModel(
 
             hostDataSource.getHost(
                 hostId = args.hostId,
-                userId = 1, // TODO: real auth
-                token = "12345" // TODO: real auth
+                userId = null, // TODO: Phase 1 - real auth
             )
                 .onSuccess { host ->
                     _state.update {
@@ -93,6 +91,8 @@ class HostDetailsViewModel(
                             isLoadingHost = false
                         )
                     }
+                    // Chain reviews loading after host is loaded, using the real user ID
+                    loadReviews(userId = host.userId)
                 }
                 .onFailure { error ->
                     _state.update {
@@ -106,19 +106,18 @@ class HostDetailsViewModel(
         }
     }
 
-    private fun loadReviews() {
+    private fun loadReviews(userId: Int) {
         viewModelScope.launch {
             _state.update { it.copy(isLoadingReviews = true, reviewsError = null) }
 
             hostDataSource.getReviews(
-                hostId = args.hostId,
-                userId = 1, // TODO: real auth
-                token = "12345" // TODO: real auth
+                userId = userId,
+                viewerId = null, // TODO: Phase 1 - real auth
             )
-                .onSuccess { reviews ->
+                .onSuccess { userReviews ->
                     _state.update {
                         it.copy(
-                            reviews = reviews.map { review -> review.toMutualReviewUi() },
+                            reviews = userReviews.threads.map { thread -> thread.toReviewThreadUi() },
                             isLoadingReviews = false
                         )
                     }

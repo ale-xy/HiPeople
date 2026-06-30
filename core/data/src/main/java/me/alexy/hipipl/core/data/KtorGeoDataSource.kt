@@ -14,11 +14,10 @@ class KtorGeoDataSource(
 ) : GeoRemoteDataSource {
 
     override suspend fun getLocationsByName(name: String): Result<List<Location>, DataError.Network> {
-        return httpClient.get<List<GeoNameDto>>(
-            route = "api.php",
+        return httpClient.getV1<List<GeoNameDto>>(
+            route = "api/v1/geo/search",
             queryParameters = mapOf(
-                "method" to "get_geo_name",
-                "name" to name
+                "query" to name
             )
         ).map { dtos ->
             dtos.mapNotNull { it.toLocation() }

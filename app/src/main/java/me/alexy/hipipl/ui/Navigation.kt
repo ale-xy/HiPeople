@@ -26,8 +26,8 @@ fun MainNavigation(modifier: Modifier) {
     ) {
         composable<LocationSearchRoute> {
             LocationSearchScreen(
-                onNavigateToHostList = { id: Int, name: String ->
-                    navController.navigate(route = HostListByLocationRoute(id, name))
+                onNavigateToHostList = { id: Int, name: String, type: String ->
+                    navController.navigate(route = HostListByLocationRoute(id, name, type))
                 }
             )
         }

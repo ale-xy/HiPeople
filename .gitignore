@@ -17,6 +17,4 @@ local.properties
 .kotlin
 **/build/
 # Local planning docs
-IMPLEMENTATION_PLAN.md
-IMPLEMENTATION_PLAN_COMPLETE.md
-REFACTORING_PLAN.md
+plans/

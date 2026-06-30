@@ -8,7 +8,11 @@ import kotlinx.serialization.Serializable
 object LocationSearchRoute
 
 @Serializable
-data class HostListByLocationRoute(val locationId: Int, val locationName: String) {
+data class HostListByLocationRoute(
+    val locationId: Int,
+    val locationName: String,
+    val locationType: String
+) {
     companion object {
         fun from(savedStateHandle: SavedStateHandle) =
             savedStateHandle.toRoute<HostListByLocationRoute>()

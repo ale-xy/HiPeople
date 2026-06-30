@@ -4,23 +4,32 @@ import java.time.LocalDateTime
 
 data class Review(
     val id: Int,
-    val receiverId: Int,
-    val authorId: Int,
     val authorName: String,
     val date: LocalDateTime,
     val text: String,
     val photo: String? = null,
     val type: ReviewType,
-    val mutal: Int,
+    val isMutual: Boolean,
 )
 
-data class MutualReview(
-    val review: Review?,
-    val response: Review?
+data class ReviewThread(
+    val received: List<Review>,
+    val response: List<Review>,
+    val isMutual: Boolean,
+)
+
+data class UserReviews(
+    val totalReceived: Int,
+    val threads: List<ReviewThread>,  // Flattened from the map for UI consumption
 )
 
 enum class ReviewType {
-    GUEST,
-    HOST,
+    HOST_POSITIVE,
+    HOST_NEGATIVE,
+    SURF_POSITIVE,
+    SURF_NEGATIVE,
+    FRIEND_POSITIVE,
+    FRIEND_NEGATIVE,
+    OTHER,
     UNKNOWN
 }

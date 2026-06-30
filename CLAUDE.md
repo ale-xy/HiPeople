@@ -28,7 +28,8 @@ HiPeople is an Android app for finding and connecting with hosts in different ci
 - `HttpClientFactory.create()` in `:core:data`
 - OkHttp engine with JSON content negotiation
 - Logging only in debug builds
-- Base URL: `https://hipipl.com` (legacy PHP API)
+- Base URL: `BuildConfig.BASE_URL` (`https://hipipl.com`), set per build type in `core/data/build.gradle.kts`
+- Calls the `/api/v1/*` REST API (`{ success, data, error }` envelope) — see [API Documentation & Web Reference](#api-documentation--web-reference) below
 
 **UI:** Jetpack Compose
 - Material 3 design system
@@ -168,29 +169,30 @@ Following the data-layer skill:
 
 ### Ktor Data Source Example
 
+v1 endpoints return a `{ success, data, error }` envelope; data sources call the `getV1`/`postV1`/`deleteV1` helpers (`core/data/SafeCall.kt`), which auto-unwrap `ApiResponse<T>` via `ApiResponse.unwrap()` (`core/data/dto/ApiResponse.kt`). No `token` query param — auth is cookie/JWT-based (real auth pending, see TODOs).
+
 ```kotlin
 class KtorHostDataSource(
-    private val client: HttpClient
+    private val httpClient: HttpClient
 ) : HostRemoteDataSource {
-    
+
     override suspend fun getHost(
         hostId: Int,
-        userId: Int,
-        token: String
+        userId: Int?,
     ): Result<HostUser, DataError.Network> {
-        return safeCall {
-            client.get(
-                urlString = constructRoute(
-                    BASE_URL,
-                    "/api.php",
-                    "action" to "getHost",
-                    "hostId" to hostId.toString(),
-                    "userId" to userId.toString(),
-                    "token" to token
-                )
-            )
-        }.map { response: HostUserDto ->
-            response.toHostUser()
+        val queryParams = mutableMapOf<String, Any>()
+        userId?.let { queryParams["user"] = it }
+
+        return httpClient.getV1<HostUserDto>(
+            route = "api/v1/hosts/$hostId",
+            queryParameters = queryParams
+        ).let { result ->
+            when (result) {
+                is Result.Success -> result.data.toHostUser()
+                    ?.let { Result.Success(it) }
+                    ?: Result.Error(DataError.Network.SERIALIZATION)
+                is Result.Error -> result
+            }
         }
     }
 }
@@ -198,17 +200,33 @@ class KtorHostDataSource(
 
 ### Safe API Calls
 
+`get`/`post`/`delete` wrap raw responses; `getV1`/`postV1`/`deleteV1` additionally unwrap the v1 envelope:
+
 ```kotlin
 suspend inline fun <reified T> safeCall(
     execute: () -> HttpResponse
 ): Result<T, DataError.Network> {
-    return try {
-        val response = execute()
-        responseToResult(response)
-    } catch (e: UnresolvedAddressException) {
-        Result.Error(DataError.Network.NO_INTERNET)
+    val response = try {
+        execute()
+    } catch (e: UnknownHostException) {
+        return Result.Error(DataError.Network.NO_INTERNET)
     } catch (e: SerializationException) {
-        Result.Error(DataError.Network.SERIALIZATION)
+        return Result.Error(DataError.Network.SERIALIZATION)
+    } catch (e: Exception) {
+        if (e is CancellationException) throw e
+        return Result.Error(DataError.Network.UNKNOWN)
+    }
+    return responseToResult(response)
+}
+
+suspend inline fun <reified Response : Any> HttpClient.getV1(
+    route: String,
+    queryParameters: Map<String, Any?> = mapOf()
+): Result<Response, DataError.Network> {
+    val envelopeResult = get<ApiResponse<Response>>(route, queryParameters)
+    return when (envelopeResult) {
+        is Result.Success -> envelopeResult.data.unwrap()
+        is Result.Error -> envelopeResult
     }
 }
 ```
@@ -225,7 +243,8 @@ data object LocationSearchRoute
 @Serializable
 data class HostListByLocationRoute(
     val locationId: Int,
-    val locationName: String
+    val locationName: String,
+    val locationType: String   // "city" | "country" | "region" — picks city_id/country_id/region_id for the v1 hosts query
 )
 
 @Serializable
@@ -301,12 +320,6 @@ NavHost(
 ./gradlew clean                # Clean build artifacts
 ```
 
-### Testing
-```bash
-./gradlew test                 # Run unit tests
-./gradlew connectedAndroidTest # Run instrumentation tests
-```
-
 ### Dependency Updates
 ```bash
 ./gradlew dependencyUpdates    # Check for dependency updates
@@ -314,11 +327,11 @@ NavHost(
 
 ## Current Limitations & TODOs
 
-1. **Authentication**: Hardcoded `userId=1, token="12345"` (see TODOs in data sources)
-2. **API Migration**: Still using legacy `/api.php` endpoint (v1 API pending - see IMPLEMENTATION_PLAN.md)
-3. **Offline Support**: No local caching yet (Room integration pending)
-4. **Testing**: Unit tests structure in place but minimal coverage
-5. **Build Config**: BASE_URL should be BuildConfig field for debug/release variants
+1. **Authentication**: `/api/v1` migration is done, but real auth isn't — `KtorHostDataSource.TEMP_USER_ID = 1` stands in for a logged-in user; no JWT/session/DataStore yet (see `plans/IMPLEMENTATION_PLAN.md` Phase 1)
+2. **Feature parity**: only read-only host browsing (search → list → details + reviews) is implemented; profile/settings, favorites, notifications, write-reviews, map, host CRUD, and localization are all unstarted (`plans/IMPLEMENTATION_PLAN.md` Phases 2-9)
+3. **Offline Support**: No local caching yet (Room integration pending, planned alongside Favorites)
+4. **Testing**: Still JUnit4 stubs with no real test bodies; JUnit5/Turbine/AssertK migration from `plans/REFACTORING_PLAN.md` Phase 6 hasn't happened
+5. **Compose**: no `@Preview` composables anywhere yet
 
 ## Adding a New Feature
 
@@ -334,11 +347,18 @@ NavHost(
 10. **Add to navigation**: Route + NavGraphBuilder extension
 11. **Register in Koin** (`featurePresentationModule`)
 
+## API Documentation & Web Reference
+
+Sibling repos hold the source of truth for the `/api/v1` backend the app talks to:
+
+- **`../hipeople-doc/docs/`** — API docs (mostly Russian). `Hi People/Methods/README.md` is the index (base URL, auth/JWT flow, response envelope, HTTP status codes); each endpoint has its own file in `Hi People/Methods/` (e.g. `GET_hosts_ID.md`, `GET_users_ID_reviews.md`, `GET_geo_search.md`). `Hi People/Screens/` documents app screens; `Hi People/АПИ/` has additional API notes.
+- **`../hipeople-frontend/`** — the production web client (vanilla JS PWA) consuming the same API; it has full feature parity (auth, profile, favorites, messaging, map, etc.) and is the **reference implementation** when porting a feature to Android. Key files: `couch/js/site-api.js` (`SiteApiClient` — canonical request shapes per endpoint), `couch/js/site-auth.js` (auth/JWT flow), `couch/search_hosts.html` (geo search + host list), `couch/host.html` (host details + reviews — see `plans/fix-host-reviews-wrong-host.md` for a worked example of cross-checking Android against this file). Its own `CLAUDE.md` documents its architecture.
+
+When implementing a new `/api/v1` endpoint or feature, check the matching `hipeople-doc` method doc for the contract and the matching `hipeople-frontend` page/JS module for how the web app actually calls it — DTOs here should match real API responses, not just the docs (see field-by-field deltas already found in `plans/IMPLEMENTATION_PLAN.md`).
+
 ## Resources
 
 - **Android Skills**: See skills loaded in the project (android-compose-ui, android-data-layer, android-di-koin, etc.)
-- **REFACTORING_PLAN.md**: Complete refactoring history (Hilt→Koin, Retrofit→Ktor)
-- **IMPLEMENTATION_PLAN.md**: Future feature roadmap (v1 API, auth, favorites, etc.)
 
 ## Notes
 

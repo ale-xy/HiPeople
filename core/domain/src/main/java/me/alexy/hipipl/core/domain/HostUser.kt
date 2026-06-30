@@ -52,5 +52,6 @@ enum class ContactType {
 enum class Gender {
     MALE,
     FEMALE,
+    PEOPLE,
     UNKNOWN
 }

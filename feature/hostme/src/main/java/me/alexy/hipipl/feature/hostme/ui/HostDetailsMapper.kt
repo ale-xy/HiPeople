@@ -2,7 +2,7 @@ package me.alexy.hipipl.feature.hostme.ui
 
 import me.alexy.hipipl.core.domain.ContactType
 import me.alexy.hipipl.core.domain.HostUser
-import me.alexy.hipipl.core.domain.MutualReview
+import me.alexy.hipipl.core.domain.ReviewThread
 import me.alexy.hipipl.core.domain.Review
 import me.alexy.hipipl.core.domain.ReviewType
 import java.time.format.DateTimeFormatter
@@ -46,10 +46,15 @@ fun HostUser.toHostDetailsUi(): HostDetailsUi {
     )
 }
 
-fun MutualReview.toMutualReviewUi(): MutualReviewUi {
+fun ReviewThread.toReviewThreadUi(): MutualReviewUi {
+    // Map thread to the existing MutualReviewUi structure
+    // Take first received and first response for backward compatibility
+    val firstReceived = received.firstOrNull()
+    val firstResponse = response.firstOrNull()
+    
     return MutualReviewUi(
-        review = review?.toReviewUi(null),
-        response = response?.toReviewUi(review?.authorName)
+        review = firstReceived?.toReviewUi(null),
+        response = firstResponse?.toReviewUi(firstReceived?.authorName)
     )
 }
 
@@ -60,7 +65,7 @@ private fun Review.toReviewUi(receiverName: String?): ReviewUi {
         formattedDate = date.format(dateFormatter),
         text = text,
         photoUrl = if (photo.isNullOrBlank()) null else photo,
-        isGuest = type == ReviewType.GUEST,
+        isGuest = type in listOf(ReviewType.SURF_POSITIVE, ReviewType.SURF_NEGATIVE),
         receiverName = receiverName
     )
 }

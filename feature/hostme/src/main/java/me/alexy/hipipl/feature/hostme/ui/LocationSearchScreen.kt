@@ -36,7 +36,7 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun LocationSearchScreen(
-    onNavigateToHostList: (Int, String) -> Unit,
+    onNavigateToHostList: (Int, String, String) -> Unit,
     viewModel: LocationSearchViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -44,7 +44,7 @@ fun LocationSearchScreen(
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
             is LocationSearchEvent.NavigateToHostList -> {
-                onNavigateToHostList(event.locationId, event.locationName)
+                onNavigateToHostList(event.locationId, event.locationName, event.locationType)
             }
         }
     }
@@ -167,7 +167,7 @@ fun LocationListItem(
 ) {
     Column(
         modifier = Modifier.clickable {
-            onAction(LocationSearchAction.OnLocationClick(location.id, location.displayName))
+            onAction(LocationSearchAction.OnLocationClick(location.id, location.displayName, location.type))
         }
     ) {
         Text(
