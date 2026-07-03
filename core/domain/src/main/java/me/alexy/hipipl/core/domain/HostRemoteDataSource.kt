@@ -1,11 +1,14 @@
 package me.alexy.hipipl.core.domain
 
 interface HostRemoteDataSource {
-    suspend fun getHostsForLocation(
+    suspend fun searchHosts(
         locationId: Int,
         locationType: String,
         userId: Int?,
-    ): Result<List<HostUser>, DataError.Network>
+        filters: HostSearchFilters = HostSearchFilters(),
+        offset: Int = 0,
+        limit: Int = 20,
+    ): Result<HostSearchResult, DataError.Network>
 
     suspend fun getHost(
         hostId: Int,

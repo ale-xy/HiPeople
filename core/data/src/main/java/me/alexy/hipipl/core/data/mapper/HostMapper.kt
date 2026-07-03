@@ -6,9 +6,11 @@ import me.alexy.hipipl.core.data.dto.HostListItemDto
 import me.alexy.hipipl.core.data.dto.HostUserDto
 import me.alexy.hipipl.core.data.dto.PhotoDto
 import me.alexy.hipipl.core.data.dto.UserLangDto
+import me.alexy.hipipl.core.data.dto.HostsPageDto
 import me.alexy.hipipl.core.domain.ContactType
 import me.alexy.hipipl.core.domain.Gender
 import me.alexy.hipipl.core.domain.HostDetails
+import me.alexy.hipipl.core.domain.HostSearchResult
 import me.alexy.hipipl.core.domain.HostUser
 import me.alexy.hipipl.core.domain.Photo
 import me.alexy.hipipl.core.domain.UserLanguage
@@ -56,13 +58,24 @@ fun HostListItemDto.toHostUser(): HostUser? {
             text = "",
             correct = 0,
             city = city.orEmpty(),
-            dist = distance?.toInt() ?: 0,
+            dist = distance ?: 0f,
             direction = direction.orEmpty(),
             separateRoom = separate == "y",
             allowKids = kids == "y",
+            petsAtHome = pets == "y",
             gender = (sex ?: gender).toGenderFromString(),
             date = null.parseApiDateTime()
         ),
+    )
+}
+
+// Map HostsPageDto (list endpoint envelope) to HostSearchResult, preserving pagination metadata.
+fun HostsPageDto.toHostSearchResult(): HostSearchResult {
+    return HostSearchResult(
+        hosts = hosts.mapNotNull { it.toHostUser() },
+        totalFound = totalFound,
+        hasMore = hasMore,
+        searchCacheId = searchCacheId,
     )
 }
 
@@ -108,16 +121,17 @@ private fun HostDto.toHostDetails(id: Int): HostDetails {
         text = text.orEmpty(),
         correct = if (accurate == true) 1 else 0,
         city = city.orEmpty(),
-        dist = dist ?: 0,
+        dist = dist?.toFloat() ?: 0f,
         direction = degree.orEmpty(),
         separateRoom = separateRoom.toYesNo(),
         allowKids = kidsAllowed.toYesNo(),
+        petsAtHome = petsPresent.toYesNo(),
         gender = gender.toGenderFromString(),
         date = date.parseApiDateTime()
     )
 }
 
-private fun PhotoDto.toPhoto(): Photo? {
+internal fun PhotoDto.toPhoto(): Photo? {
     val photoUrl = url ?: return null
     return Photo(id = id ?: -1, url = photoUrl)
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.alexy.hipipl.core.ui
+package me.alexy.hipipl.core.designsystem
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

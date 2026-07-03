@@ -29,7 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import me.alexy.hipipl.core.presentation.ObserveAsEvents
 import me.alexy.hipipl.core.presentation.asString
-import me.alexy.hipipl.core.ui.LightGreen
+import me.alexy.hipipl.core.designsystem.LightGreen
 import me.alexy.hipipl.feature.hostitem.R
 import org.koin.androidx.compose.koinViewModel
 
@@ -132,7 +132,7 @@ fun HostListItem(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val placeholder = painterResource(me.alexy.hipipl.core.ui.R.drawable.avatar)
+        val placeholder = painterResource(me.alexy.hipipl.core.designsystem.R.drawable.avatar)
 
         AsyncImage(
             modifier = Modifier.size(120.dp),

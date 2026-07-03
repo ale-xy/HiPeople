@@ -28,11 +28,12 @@ data class HostDetails(
     val text: String,
     val correct: Int,
     val city: String,
-    val dist: Int,
+    val dist: Float,
     val direction: String,
     val date: LocalDateTime,
     val separateRoom: Boolean,
     val allowKids: Boolean,
+    val petsAtHome: Boolean,
     val gender: Gender
 )
 

@@ -81,15 +81,15 @@ class HostListByLocationViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
-            hostDataSource.getHostsForLocation(
+            hostDataSource.searchHosts(
                 locationId = args.locationId,
                 locationType = args.locationType,
                 userId = null, // TODO: Phase 1 - real auth
             )
-                .onSuccess { hosts ->
+                .onSuccess { result ->
                     _state.update {
                         it.copy(
-                            hosts = hosts.map { host -> host.toHostListItemUi() },
+                            hosts = result.hosts.map { host -> host.toHostListItemUi() },
                             isLoading = false
                         )
                     }

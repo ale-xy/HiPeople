@@ -1,14 +1,17 @@
 package me.alexy.hipipl.core.data
 
 import io.ktor.client.HttpClient
-import me.alexy.hipipl.core.data.dto.HostListItemDto
 import me.alexy.hipipl.core.data.dto.HostUserDto
 import me.alexy.hipipl.core.data.dto.HostsPageDto
 import me.alexy.hipipl.core.data.dto.UserReviewsResponseDto
+import me.alexy.hipipl.core.data.mapper.toHostSearchResult
 import me.alexy.hipipl.core.data.mapper.toHostUser
+import me.alexy.hipipl.core.data.mapper.toQueryParams
 import me.alexy.hipipl.core.data.mapper.toUserReviews
 import me.alexy.hipipl.core.domain.DataError
 import me.alexy.hipipl.core.domain.HostRemoteDataSource
+import me.alexy.hipipl.core.domain.HostSearchFilters
+import me.alexy.hipipl.core.domain.HostSearchResult
 import me.alexy.hipipl.core.domain.HostUser
 import me.alexy.hipipl.core.domain.UserReviews
 import me.alexy.hipipl.core.domain.Result
@@ -23,11 +26,14 @@ class KtorHostDataSource(
         const val TEMP_USER_ID = 1
     }
 
-    override suspend fun getHostsForLocation(
+    override suspend fun searchHosts(
         locationId: Int,
         locationType: String,
         userId: Int?,
-    ): Result<List<HostUser>, DataError.Network> {
+        filters: HostSearchFilters,
+        offset: Int,
+        limit: Int,
+    ): Result<HostSearchResult, DataError.Network> {
         // Build query params based on location type (city_id, country_id, or region_id)
         val locationParam = when (locationType) {
             "city" -> "city_id"
@@ -35,19 +41,22 @@ class KtorHostDataSource(
             "region" -> "region_id"
             else -> "city_id"
         }
-        
-        val queryParams = mutableMapOf(
-            locationParam to locationId
+
+        val queryParams = mutableMapOf<String, Any>(
+            locationParam to locationId,
+            "offset" to offset,
+            "limit" to limit,
         )
-        
+        queryParams.putAll(filters.toQueryParams())
+
         // Add optional user parameter (no token in v1)
         userId?.let { queryParams["user"] = it }
-        
+
         return httpClient.getV1<HostsPageDto>(
             route = "api/v1/hosts",
             queryParameters = queryParams
         ).map { page ->
-            page.hosts.mapNotNull { it.toHostUser() }
+            page.toHostSearchResult()
         }
     }
 

@@ -45,10 +45,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import me.alexy.hipipl.core.presentation.asString
-import me.alexy.hipipl.core.ui.Blue
-import me.alexy.hipipl.core.ui.LightGreen
-import me.alexy.hipipl.core.ui.LightPeach
-import me.alexy.hipipl.core.ui.Yellow
+import me.alexy.hipipl.core.designsystem.Blue
+import me.alexy.hipipl.core.designsystem.LightGreen
+import me.alexy.hipipl.core.designsystem.LightPeach
+import me.alexy.hipipl.core.designsystem.Yellow
 import me.alexy.hipipl.feature.hostitem.R
 import org.koin.androidx.compose.koinViewModel
 
@@ -127,7 +127,7 @@ fun HostDetailsScreen(
 
 @Composable
 fun HostDetailsContent(host: HostDetailsUi) {
-    val placeholder = painterResource(me.alexy.hipipl.core.ui.R.drawable.avatar)
+    val placeholder = painterResource(me.alexy.hipipl.core.designsystem.R.drawable.avatar)
     val pagerState = rememberPagerState(pageCount = { host.photos.size })
 
     Column {
