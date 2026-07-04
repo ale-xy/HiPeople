@@ -41,15 +41,19 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import me.alexy.hipipl.core.presentation.asString
 import me.alexy.hipipl.core.designsystem.Blue
+import me.alexy.hipipl.core.designsystem.HiPeopleTheme
 import me.alexy.hipipl.core.designsystem.LightGreen
 import me.alexy.hipipl.core.designsystem.LightPeach
 import me.alexy.hipipl.core.designsystem.Yellow
 import me.alexy.hipipl.feature.hostitem.R
+import me.alexy.hipipl.feature.hostme.ui.preview.HostDetailsScreenPreviewParameterProvider
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -122,6 +126,16 @@ fun HostDetailsScreen(
                 }
             }
         }
+    }
+}
+
+@Preview
+@Composable
+private fun HostDetailsScreenPreview(
+    @PreviewParameter(HostDetailsScreenPreviewParameterProvider::class) state: HostDetailsState,
+) {
+    HiPeopleTheme {
+        HostDetailsScreen(state = state)
     }
 }
 
@@ -235,6 +249,14 @@ fun HostDetailsContent(host: HostDetailsUi) {
     }
 }
 
+@Preview
+@Composable
+private fun HostDetailsContentPreview() {
+    HiPeopleTheme {
+        HostDetailsContent(host = sampleHostDetailsUi)
+    }
+}
+
 @Composable
 fun ContactsList(contacts: Map<String, String>) {
     val context = LocalContext.current
@@ -286,6 +308,14 @@ fun ContactsList(contacts: Map<String, String>) {
     }
 }
 
+@Preview
+@Composable
+private fun ContactsListPreview() {
+    HiPeopleTheme {
+        ContactsList(contacts = mapOf("Telegram" to "annahost", "Phone" to "+79001234567"))
+    }
+}
+
 @Composable
 private fun ContactIconButton(
     type: String,
@@ -326,6 +356,14 @@ fun MutualReviewItem(mutualReview: MutualReviewUi) {
                 backgroundColor = LightGreen
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun MutualReviewItemPreview() {
+    HiPeopleTheme {
+        MutualReviewItem(mutualReview = sampleMutualReviewUi)
     }
 }
 
@@ -388,3 +426,42 @@ fun ReviewCard(
         }
     }
 }
+
+@Preview
+@Composable
+private fun ReviewCardPreview() {
+    HiPeopleTheme {
+        ReviewCard(review = sampleReviewUi, backgroundColor = LightPeach)
+    }
+}
+
+private val sampleReviewUi = ReviewUi(
+    id = 1,
+    authorName = "Max",
+    formattedDate = "12.05.2025",
+    text = "Great host, very welcoming!",
+    photoUrl = null,
+    isGuest = true,
+    receiverName = null,
+)
+
+private val sampleMutualReviewUi = MutualReviewUi(
+    review = sampleReviewUi,
+    response = sampleReviewUi.copy(id = 2, authorName = "Anna", isGuest = false, receiverName = "Max", text = "Thanks for staying, Max!"),
+)
+
+private val sampleHostDetailsUi = HostDetailsUi(
+    userId = 1,
+    name = "Anna",
+    photos = emptyList(),
+    languagesText = "English: B2, Russian: Native",
+    cityText = "Moscow",
+    nameWithAge = "Anna (28 лет)",
+    ratingText = "4.5* (10)",
+    donateAmount = 3,
+    showDonation = true,
+    description = "Friendly host, always happy to show guests around the city.",
+    hostText = "I have a spare room and love meeting travelers.",
+    contacts = mapOf("Telegram" to "annahost", "Phone" to "+79001234567"),
+    hasContacts = true,
+)
