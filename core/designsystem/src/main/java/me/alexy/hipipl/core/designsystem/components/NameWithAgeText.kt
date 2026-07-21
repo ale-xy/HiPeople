@@ -1,4 +1,4 @@
-package me.alexy.hipipl.feature.hostme.ui
+package me.alexy.hipipl.core.designsystem.components
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -16,7 +16,7 @@ import me.alexy.hipipl.core.designsystem.HiPeopleTheme
  * the mockup, not one uniformly-styled string.
  */
 @Composable
-internal fun NameWithAgeText(name: String, ageText: String, modifier: Modifier = Modifier) {
+fun NameWithAgeText(name: String, ageText: String, modifier: Modifier = Modifier) {
     val onSurface = MaterialTheme.colorScheme.onSurface
     val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
     val ageFontSize = MaterialTheme.typography.bodyMedium.fontSize

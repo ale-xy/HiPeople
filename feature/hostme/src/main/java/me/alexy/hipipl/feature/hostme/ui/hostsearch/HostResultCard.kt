@@ -1,4 +1,4 @@
-package me.alexy.hipipl.feature.hostme.ui
+package me.alexy.hipipl.feature.hostme.ui.hostsearch
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,6 +22,7 @@ import me.alexy.hipipl.core.designsystem.GenderAccent
 import me.alexy.hipipl.core.designsystem.HiPeopleTheme
 import me.alexy.hipipl.core.designsystem.components.AmenityChipRow
 import me.alexy.hipipl.core.designsystem.components.CompassArrowIcon
+import me.alexy.hipipl.core.designsystem.components.NameWithAgeText
 import me.alexy.hipipl.core.designsystem.components.ReferencesText
 import me.alexy.hipipl.core.designsystem.components.ResultCard
 import me.alexy.hipipl.core.designsystem.toColor

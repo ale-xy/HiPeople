@@ -1,4 +1,4 @@
-package me.alexy.hipipl.feature.hostme.ui
+package me.alexy.hipipl.feature.hostme.ui.usersearch
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -17,6 +17,7 @@ import me.alexy.hipipl.core.domain.onSuccess
 import me.alexy.hipipl.core.presentation.UiText
 import me.alexy.hipipl.core.presentation.toUiText
 import me.alexy.hipipl.feature.hostitem.R
+import me.alexy.hipipl.feature.hostme.ui.hostsearch.toUserCardUi
 
 class UserSearchViewModel(
     private val contactSearchDataSource: ContactSearchRemoteDataSource,

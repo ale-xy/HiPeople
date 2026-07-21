@@ -1,7 +1,6 @@
-package me.alexy.hipipl.feature.hostme.ui
+package me.alexy.hipipl.feature.hostme.ui.usersearch
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,26 +18,27 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import kotlinx.coroutines.launch
 import me.alexy.hipipl.core.designsystem.HiPeopleTheme
 import me.alexy.hipipl.core.designsystem.components.EmptyStateIllustration
+import me.alexy.hipipl.core.designsystem.components.NameWithAgeText
 import me.alexy.hipipl.core.designsystem.components.ResultCard
 import me.alexy.hipipl.core.designsystem.components.SearchTextField
 import me.alexy.hipipl.core.presentation.asString
 import me.alexy.hipipl.feature.hostitem.R
-import me.alexy.hipipl.feature.hostme.ui.preview.UsersTabContentPreviewParameterProvider
+import me.alexy.hipipl.feature.hostme.ui.hostsearch.HostsMapCard
 
 @Composable
 internal fun UsersTabContent(
@@ -46,8 +46,9 @@ internal fun UsersTabContent(
     onAction: (UserSearchAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val clipboardManager = LocalClipboardManager.current
+    val clipboard = LocalClipboard.current
     val keyboardController = LocalSoftwareKeyboardController.current
+    val coroutineScope = rememberCoroutineScope()
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -74,8 +75,13 @@ internal fun UsersTabContent(
                     )
                 },
                 onTrailingIconClick = {
-                    clipboardManager.getText()?.text?.let { pasted ->
-                        onAction(UserSearchAction.OnPasteFromClipboard(pasted))
+                    coroutineScope.launch {
+                        val pasted = clipboard.getClipEntry()
+                            ?.clipData
+                            ?.getItemAt(0)
+                            ?.text
+                            ?.toString()
+                        pasted?.let { onAction(UserSearchAction.OnPasteFromClipboard(it)) }
                     }
                 }
             )

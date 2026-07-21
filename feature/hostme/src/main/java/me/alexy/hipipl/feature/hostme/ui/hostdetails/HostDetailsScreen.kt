@@ -1,4 +1,4 @@
-package me.alexy.hipipl.feature.hostme.ui
+package me.alexy.hipipl.feature.hostme.ui.hostdetails
 
 import android.content.Intent
 import android.net.Uri
@@ -53,7 +53,6 @@ import me.alexy.hipipl.core.designsystem.LightGreen
 import me.alexy.hipipl.core.designsystem.LightPeach
 import me.alexy.hipipl.core.designsystem.Yellow
 import me.alexy.hipipl.feature.hostitem.R
-import me.alexy.hipipl.feature.hostme.ui.preview.HostDetailsScreenPreviewParameterProvider
 import org.koin.androidx.compose.koinViewModel
 
 @Composable

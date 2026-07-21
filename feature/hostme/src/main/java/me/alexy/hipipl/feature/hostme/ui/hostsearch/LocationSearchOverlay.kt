@@ -1,4 +1,4 @@
-package me.alexy.hipipl.feature.hostme.ui
+package me.alexy.hipipl.feature.hostme.ui.hostsearch
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -35,7 +35,6 @@ import me.alexy.hipipl.core.designsystem.components.SearchTextField
 import me.alexy.hipipl.core.designsystem.components.SuggestionItemUi
 import me.alexy.hipipl.core.designsystem.components.SuggestionsDropdown
 import me.alexy.hipipl.feature.hostitem.R
-import me.alexy.hipipl.feature.hostme.ui.preview.LocationSearchOverlayPreviewParameterProvider
 
 /**
  * Full-screen search overlay using SearchTextField. Replaces LocationSearchBottomSheet

@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
@@ -55,7 +56,13 @@ fun SearchTextField(
             onValueChange = onQueryChange,
             modifier = Modifier.fillMaxWidth(),
             readOnly = readOnly,
-            placeholder = { Text(placeholder) },
+            placeholder = {
+                Text(
+                    text = placeholder,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            },
             leadingIcon = leadingIcon,
             trailingIcon = trailingIcon?.let { { Spacer(Modifier.size(48.dp)) } },
             singleLine = true,

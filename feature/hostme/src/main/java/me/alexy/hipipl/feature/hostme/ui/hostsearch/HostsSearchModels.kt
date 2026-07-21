@@ -1,4 +1,4 @@
-package me.alexy.hipipl.feature.hostme.ui
+package me.alexy.hipipl.feature.hostme.ui.hostsearch
 
 import me.alexy.hipipl.core.designsystem.GenderAccent
 import me.alexy.hipipl.core.designsystem.components.TriState

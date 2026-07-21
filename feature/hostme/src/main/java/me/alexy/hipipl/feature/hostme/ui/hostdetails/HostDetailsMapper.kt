@@ -1,4 +1,4 @@
-package me.alexy.hipipl.feature.hostme.ui
+package me.alexy.hipipl.feature.hostme.ui.hostdetails
 
 import me.alexy.hipipl.core.domain.ContactType
 import me.alexy.hipipl.core.domain.HostUser

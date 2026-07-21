@@ -1,4 +1,4 @@
-package me.alexy.hipipl.feature.hostme.ui
+package me.alexy.hipipl.feature.hostme.ui.hostsearch
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel

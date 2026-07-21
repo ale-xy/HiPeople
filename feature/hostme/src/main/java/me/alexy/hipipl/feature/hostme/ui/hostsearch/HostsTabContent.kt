@@ -1,4 +1,4 @@
-package me.alexy.hipipl.feature.hostme.ui
+package me.alexy.hipipl.feature.hostme.ui.hostsearch
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -39,7 +39,6 @@ import me.alexy.hipipl.core.designsystem.components.EmptyStateIllustration
 import me.alexy.hipipl.core.designsystem.components.SearchTextField
 import me.alexy.hipipl.core.presentation.asString
 import me.alexy.hipipl.feature.hostitem.R
-import me.alexy.hipipl.feature.hostme.ui.preview.HostsTabContentPreviewParameterProvider
 
 @Composable
 internal fun HostsTabContent(

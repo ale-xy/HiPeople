@@ -1,4 +1,4 @@
-package me.alexy.hipipl.feature.hostme.ui
+package me.alexy.hipipl.feature.hostme.ui.usersearch
 
 import me.alexy.hipipl.core.presentation.UiText
 

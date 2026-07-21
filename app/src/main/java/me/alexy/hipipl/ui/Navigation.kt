@@ -8,7 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import me.alexy.hipipl.feature.hostme.HostDetailsRoute
 import me.alexy.hipipl.feature.hostme.HostSearchRoute
-import me.alexy.hipipl.feature.hostme.ui.HostDetailsScreen
+import me.alexy.hipipl.feature.hostme.ui.hostdetails.HostDetailsScreen
 import me.alexy.hipipl.feature.hostme.ui.HostSearchScreen
 
 @Composable

@@ -1,4 +1,4 @@
-package me.alexy.hipipl.feature.hostme.ui
+package me.alexy.hipipl.feature.hostme.ui.hostsearch
 
 import me.alexy.hipipl.core.designsystem.GenderAccent
 import me.alexy.hipipl.core.designsystem.components.TriState
@@ -8,6 +8,7 @@ import me.alexy.hipipl.core.domain.HostSearchFilters
 import me.alexy.hipipl.core.domain.HostUser
 import me.alexy.hipipl.core.domain.Location
 import me.alexy.hipipl.core.domain.TriStateFilter
+import me.alexy.hipipl.feature.hostme.ui.usersearch.UserCardUi
 
 fun Location.toLocationUi(): LocationUi {
     return LocationUi(

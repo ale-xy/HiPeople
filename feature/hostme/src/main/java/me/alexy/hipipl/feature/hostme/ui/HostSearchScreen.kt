@@ -28,8 +28,17 @@ import kotlinx.coroutines.launch
 import me.alexy.hipipl.core.designsystem.HiPeopleTheme
 import me.alexy.hipipl.core.presentation.ObserveAsEvents
 import me.alexy.hipipl.feature.hostitem.R
-import me.alexy.hipipl.feature.hostme.ui.preview.HostSearchScreenPreviewParameterProvider
-import me.alexy.hipipl.feature.hostme.ui.preview.HostSearchScreenPreviewState
+import me.alexy.hipipl.feature.hostme.ui.hostsearch.FilterBottomSheet
+import me.alexy.hipipl.feature.hostme.ui.hostsearch.HostsSearchAction
+import me.alexy.hipipl.feature.hostme.ui.hostsearch.HostsSearchEvent
+import me.alexy.hipipl.feature.hostme.ui.hostsearch.HostsSearchState
+import me.alexy.hipipl.feature.hostme.ui.hostsearch.HostsSearchViewModel
+import me.alexy.hipipl.feature.hostme.ui.hostsearch.HostsTabContent
+import me.alexy.hipipl.feature.hostme.ui.usersearch.UserSearchAction
+import me.alexy.hipipl.feature.hostme.ui.usersearch.UserSearchEvent
+import me.alexy.hipipl.feature.hostme.ui.usersearch.UserSearchState
+import me.alexy.hipipl.feature.hostme.ui.usersearch.UserSearchViewModel
+import me.alexy.hipipl.feature.hostme.ui.usersearch.UsersTabContent
 import org.koin.androidx.compose.koinViewModel
 
 enum class SearchTab { HOSTS, USERS }
