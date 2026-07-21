@@ -5,7 +5,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,12 +18,9 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,7 +37,6 @@ import me.alexy.hipipl.core.designsystem.AppColors
 import me.alexy.hipipl.core.designsystem.HiPeopleTheme
 import me.alexy.hipipl.core.designsystem.components.EmptyStateIllustration
 import me.alexy.hipipl.core.designsystem.components.SearchTextField
-import me.alexy.hipipl.core.designsystem.components.ThreeWayToggle
 import me.alexy.hipipl.core.presentation.asString
 import me.alexy.hipipl.feature.hostitem.R
 import me.alexy.hipipl.feature.hostme.ui.preview.HostsTabContentPreviewParameterProvider
@@ -201,11 +196,9 @@ internal fun HostsTabContent(
             }
         }
 
+        LocationSearchOverlay(state = state, onAction = onAction)
     }
 
-    if (state.isSearchSheetOpen) {
-        LocationSearchBottomSheet(state = state, onAction = onAction)
-    }
     if (state.isFilterSheetOpen) {
         FilterBottomSheet(filters = state.filters, onAction = onAction)
     }
@@ -218,62 +211,5 @@ private fun HostsTabContentPreview(
 ) {
     HiPeopleTheme {
         HostsTabContent(state = state, onAction = {})
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-internal fun FilterBottomSheet(
-    filters: HostSearchFiltersUi,
-    onAction: (HostsSearchAction) -> Unit
-) {
-    val yesLabel = stringResource(R.string.button_yes)
-    val noLabel = stringResource(R.string.button_no)
-    val unspecifiedLabel = stringResource(R.string.filter_not_specified)
-
-    ModalBottomSheet(
-        onDismissRequest = { onAction(HostsSearchAction.OnDismissFilterSheet) },
-        scrimColor = AppColors.Scrim.copy(alpha = 0.42f)
-    ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            ThreeWayToggle(
-                label = stringResource(R.string.add_host_separate),
-                value = filters.separateRoom,
-                onValueChange = { onAction(HostsSearchAction.OnFilterChange(filters.copy(separateRoom = it))) },
-                yesLabel = yesLabel,
-                unspecifiedLabel = unspecifiedLabel,
-                noLabel = noLabel
-            )
-            ThreeWayToggle(
-                label = stringResource(R.string.add_host_kid),
-                value = filters.kidsAllowed,
-                onValueChange = { onAction(HostsSearchAction.OnFilterChange(filters.copy(kidsAllowed = it))) },
-                yesLabel = yesLabel,
-                unspecifiedLabel = unspecifiedLabel,
-                noLabel = noLabel
-            )
-            ThreeWayToggle(
-                label = stringResource(R.string.add_host_pet),
-                value = filters.petsAtHome,
-                onValueChange = { onAction(HostsSearchAction.OnFilterChange(filters.copy(petsAtHome = it))) },
-                yesLabel = yesLabel,
-                unspecifiedLabel = unspecifiedLabel,
-                noLabel = noLabel
-            )
-            Button(
-                onClick = { onAction(HostsSearchAction.OnApplyFilters) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.button_ok))
-            }
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun FilterBottomSheetPreview() {
-    HiPeopleTheme {
-        FilterBottomSheet(filters = HostSearchFiltersUi(), onAction = {})
     }
 }

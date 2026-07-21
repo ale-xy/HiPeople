@@ -6,7 +6,7 @@
     <string name="button__search">Поиск</string>
     <string name="hosts_on_map">Хосты на карте</string>
     <string name="search_hosts_find">Найдено %1$d хостов</string>
-    <string name="search_hosts_no_find">Хостов не найдено...(</string>
+    <string name="search_hosts_no_find">Хостов не найдено…(</string>
     <string name="city_coordinates">Город, страна или координаты</string>
     <string name="searching_locations">Поиск локаций…</string>
     <string name="add_host_separate">Гость живет в отдельной комнате?</string>
@@ -26,6 +26,8 @@
     <!-- Search screen: not in the doc's key table, needed for elements it doesn't cover -->
     <string name="tab_hosts">Хосты</string>
     <string name="tab_users">Пользователи</string>
+    <string name="cd_back">Назад</string>
+    <string name="cd_clear_search">Очистить поиск</string>
     <string name="cd_filter_button">Фильтры</string>
     <string name="cd_paste_button">Вставить из буфера обмена</string>
     <string name="user_not_found">Пользователь не найден</string>

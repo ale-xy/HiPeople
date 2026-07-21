@@ -85,7 +85,7 @@ class HostsTabContentPreviewParameterProvider : PreviewParameterProvider<HostsSe
     )
 }
 
-class LocationSearchBottomSheetPreviewParameterProvider : PreviewParameterProvider<HostsSearchState> {
+class LocationSearchOverlayPreviewParameterProvider : PreviewParameterProvider<HostsSearchState> {
     override val values = sequenceOf(
         HostsSearchState(locationQuery = "", isSearchSheetOpen = true),
         HostsSearchState(locationQuery = "Mos", isLoadingSuggestions = true, isSearchSheetOpen = true),
