@@ -116,7 +116,7 @@ fun HostSearchScreen(
             modifier = Modifier.padding(16.dp)
         )
 
-        val tabTitles = listOf(stringResource(R.string.tab_hosts), stringResource(R.string.tab_users))
+        val tabTitles = listOf(stringResource(R.string.tab_hosts), stringResource(R.string.search_tab_users))
         PrimaryTabRow(
             selectedTabIndex = selectedTab.ordinal,
             containerColor = MaterialTheme.colorScheme.background,

@@ -28,7 +28,9 @@ fun MainNavigation(modifier: Modifier) {
             )
         }
         composable<HostDetailsRoute> {
-            HostDetailsScreen()
+            HostDetailsScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
     }
 }

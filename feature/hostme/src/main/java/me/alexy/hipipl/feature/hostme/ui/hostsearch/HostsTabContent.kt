@@ -63,7 +63,7 @@ internal fun HostsTabContent(
                 SearchTextField(
                     query = state.locationQuery,
                     onQueryChange = {},
-                    placeholder = stringResource(R.string.city_coordinates),
+                    placeholder = stringResource(R.string.coordinates_city),
                     modifier = Modifier.padding(horizontal = 16.dp),
                     leadingIcon = {
                         Icon(
@@ -125,7 +125,7 @@ internal fun HostsTabContent(
                         EmptyStateIllustration(
                             icon = Icons.Default.Home,
                             title = stringResource(R.string.search_hosts_initial_title),
-                            subtitle = stringResource(R.string.search_hosts_initial_subtitle),
+                            subtitle = stringResource(R.string.search_hosts),
                             modifier = Modifier.fillMaxWidth()
                         )
                     }

@@ -29,11 +29,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
 import me.alexy.hipipl.core.designsystem.HiPeopleTheme
 import me.alexy.hipipl.core.designsystem.components.EmptyStateIllustration
 import me.alexy.hipipl.core.designsystem.components.NameWithAgeText
+import me.alexy.hipipl.core.designsystem.components.NetworkImage
 import me.alexy.hipipl.core.designsystem.components.ResultCard
 import me.alexy.hipipl.core.designsystem.components.SearchTextField
 import me.alexy.hipipl.core.presentation.asString
@@ -180,13 +180,14 @@ private fun UserResultCard(user: UserCardUi, modifier: Modifier = Modifier) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             NameWithAgeText(name = user.name, ageText = user.ageText, modifier = Modifier.weight(1f))
             if (user.photoUrl != null) {
-                AsyncImage(
+                NetworkImage(
                     model = user.photoUrl,
                     contentDescription = stringResource(R.string.host_photo_description),
                     modifier = Modifier
                         .size(96.dp)
                         .clip(RoundedCornerShape(14.dp)),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
+                    indicatorSize = 20.dp,
                 )
             }
         }

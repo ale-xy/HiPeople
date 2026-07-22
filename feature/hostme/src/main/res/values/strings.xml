@@ -7,7 +7,8 @@
     <string name="hosts_on_map">Хосты на карте</string>
     <string name="search_hosts_find">Найдено %1$d хостов</string>
     <string name="search_hosts_no_find">Хостов не найдено…(</string>
-    <string name="city_coordinates">Город, страна или координаты</string>
+    <string name="coordinates_city">Координаты (lat, lon) или город</string>
+    <string name="search_hosts">Напишите название города или страны или координаты, чтобы найти кауч хостов</string>
     <string name="searching_locations">Поиск локаций…</string>
     <string name="add_host_separate">Гость живет в отдельной комнате?</string>
     <string name="add_host_kid">Можно с детьми до 12 лет?</string>
@@ -21,33 +22,74 @@
     <string name="phone_link">Ссылка на соц сети или номер</string>
     <string name="searching_user">Поиск пользователя…</string>
     <string name="found_user">Найден пользователь</string>
+    <string name="search_tab_users">Пользователи</string>
+    <string name="button_back">Назад</string>
     <string name="km">км</string>
 
     <!-- Search screen: not in the doc's key table, needed for elements it doesn't cover -->
     <string name="tab_hosts">Хосты</string>
-    <string name="tab_users">Пользователи</string>
-    <string name="cd_back">Назад</string>
     <string name="cd_clear_search">Очистить поиск</string>
     <string name="cd_filter_button">Фильтры</string>
     <string name="cd_paste_button">Вставить из буфера обмена</string>
     <string name="user_not_found">Пользователь не найден</string>
     <string name="search_hosts_initial_title">Найдите хостов рядом с вами</string>
-    <string name="search_hosts_initial_subtitle">Введите город, страну или координаты выше, чтобы увидеть хостов, у которых можно остановиться.</string>
     <string name="search_hosts_empty_subtitle">Попробуйте другой город или измените фильтры.</string>
     <string name="edit_filters">Изменить фильтры</string>
     <string name="user_not_found_hint">Проверьте ссылку или номер телефона и попробуйте снова.</string>
 
-    <string name="age_format">%s лет</string>
-    <string name="distance_km_format">%s км</string>
-    <string name="rating_format">Рейтинг: %s</string>
-    <string name="donation_format">Сделал донат %d</string>
-    <string name="about_me">Обо мне:</string>
-    <string name="reviews_header">Отзывы:</string>
     <string name="no_reviews">Отзывов нет</string>
-    <string name="lang_format">Языки: %s</string>
-    <string name="contacts_header">Контакты:</string>
     <string name="host_photo_description">Host photo</string>
+    <string name="no_photos_yet">Пока нет фото</string>
     <string name="review_photo_description">Review photo</string>
-    <string name="copy_to_clipboard">Copy to clipboard</string>
+
+    <!-- Host profile: keys taken from the Localization tables in ../hipeople-doc/docs/Hi People/Screens/
+         Хост.md, Пользователь.md, Add_Review.md and Сообщения.md -->
+    <string name="user_about">Обо мне:</string>
+    <string name="user_contacts">Контакты:</string>
+    <string name="host_description">Принимаю гостей:</string>
+    <string name="host_separate_yes">Отдельная спальня</string>
+    <string name="host_separate_no">Нет отдельной спальни для гостей</string>
+    <string name="host_child_yes">Можно с детьми</string>
+    <string name="host_child_no">С детьми нельзя</string>
+    <string name="host_pet_yes">В доме животные</string>
+    <string name="host_pet_no">Нет животных</string>
+    <string name="button_get_contacts">Связаться</string>
+    <string name="messages_input_placeholder">Сообщение…</string>
+    <string name="messages_send">Отправить</string>
+    <string name="button_add_favorite">В избранное</string>
+    <string name="button_complaint">Жалоба</string>
+    <string name="button_cancel">Отмена</string>
+    <string name="button_send">Отправить</string>
+    <string name="complaint_text_required">Введите текст жалобы</string>
+    <string name="complaint_sent_success">Жалоба отправлена</string>
+    <string name="reviews_title">Отзывы:</string>
+    <string name="button_add_rev">Оставить отзыв</string>
+    <string name="show_more_reviews">Показать ещё отзывы</string>
+    <string name="hide_reviews">Скрыть отзывы</string>
+    <string name="button_copy_link">Скопировать ссылку</string>
+    <string name="copied">Скопировано</string>
+    <string name="review_cs_guest">Кауч Гость</string>
+    <string name="review_cs_host">Кауч Хост</string>
+
+    <!-- Host profile: not present in the Localization doc above — added here in Russian -->
+    <string name="cd_previous_photo">Предыдущее фото</string>
+    <string name="cd_next_photo">Следующее фото</string>
+    <string name="cd_close_viewer">Закрыть</string>
+    <string name="open_in_google_maps">G.map</string>
+    <string name="open_in_other_maps">CoMaps</string>
+    <string name="report_placeholder">Опишите проблему…</string>
+    <string name="added_to_favorites">Добавлено в избранное</string>
+    <string name="removed_from_favorites">Удалено из избранного</string>
+    <string name="message_sent">Сообщение отправлено</string>
+    <string name="mutual_friend_cd">Взаимный отзыв</string>
+    <string name="reply_from_format">Ответ от %s</string>
+    <string name="photo_counter_format">%1$d / %2$d</string>
+    <string name="contact_chip_format">%1$s: %2$s</string>
+    <string name="role_label_format">(%1$s)</string>
+    <string name="contact_type_vk">VK</string>
+    <string name="contact_type_telegram">Telegram</string>
+    <string name="contact_type_facebook">Facebook</string>
+    <string name="contact_type_phone">Телефон</string>
+    <string name="contact_type_other">Другое</string>
 
 </resources>

@@ -3,8 +3,11 @@ package me.alexy.hipipl.feature.hostme.ui.hostdetails
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.alexy.hipipl.core.domain.HostRemoteDataSource
@@ -12,51 +15,8 @@ import me.alexy.hipipl.core.domain.onFailure
 import me.alexy.hipipl.core.domain.onSuccess
 import me.alexy.hipipl.core.presentation.UiText
 import me.alexy.hipipl.core.presentation.toUiText
+import me.alexy.hipipl.feature.hostitem.R
 import me.alexy.hipipl.feature.hostme.HostDetailsRoute
-
-data class HostDetailsState(
-    val isLoadingHost: Boolean = true,
-    val host: HostDetailsUi? = null,
-    val hostError: UiText? = null,
-    val isLoadingReviews: Boolean = true,
-    val reviews: List<MutualReviewUi> = emptyList(),
-    val reviewsError: UiText? = null
-)
-
-sealed interface HostDetailsAction {
-    // No actions yet - read-only screen
-}
-
-data class HostDetailsUi(
-    val userId: Int,
-    val name: String,
-    val photos: List<String>,
-    val languagesText: String,
-    val cityText: String,
-    val nameWithAge: String,  // "Alex (30 лет)" or just "Alex"
-    val ratingText: String,  // "4.5* (10)"
-    val donateAmount: Int,
-    val showDonation: Boolean,
-    val description: String,
-    val hostText: String,
-    val contacts: Map<String, String>,  // Already string keys instead of ContactType
-    val hasContacts: Boolean
-)
-
-data class MutualReviewUi(
-    val review: ReviewUi?,
-    val response: ReviewUi?
-)
-
-data class ReviewUi(
-    val id: Int,
-    val authorName: String,
-    val formattedDate: String,  // "dd.MM.yyyy"
-    val text: String,
-    val photoUrl: String?,
-    val isGuest: Boolean,
-    val receiverName: String?  // For responses: "to: {name}"
-)
 
 class HostDetailsViewModel(
     private val hostDataSource: HostRemoteDataSource,
@@ -68,12 +28,92 @@ class HostDetailsViewModel(
     private val _state = MutableStateFlow(HostDetailsState())
     val state: StateFlow<HostDetailsState> = _state
 
+    private val _events = Channel<HostDetailsEvent>()
+    val events: Flow<HostDetailsEvent> = _events.receiveAsFlow()
+
     init {
         loadHost()
     }
 
     fun onAction(action: HostDetailsAction) {
-        // No actions yet
+        when (action) {
+            HostDetailsAction.ToggleFavorite -> toggleFavorite()
+            HostDetailsAction.RevealContacts -> _state.update { it.copy(isContactsRevealed = true) }
+            is HostDetailsAction.OnMessageDraftChange -> {
+                _state.update { it.copy(messageDraft = action.text) }
+            }
+            HostDetailsAction.SendMessage -> sendMessage()
+            HostDetailsAction.OpenReport -> {
+                _state.update { it.copy(reportSheet = it.reportSheet.copy(isOpen = true)) }
+            }
+            HostDetailsAction.DismissReport -> {
+                _state.update { it.copy(reportSheet = ReportSheetState()) }
+            }
+            is HostDetailsAction.OnReportTextChange -> {
+                _state.update { it.copy(reportSheet = it.reportSheet.copy(text = action.text, error = null)) }
+            }
+            HostDetailsAction.SendReport -> sendReport()
+            is HostDetailsAction.OpenPhotoViewer -> {
+                _state.update { it.copy(isPhotoViewerOpen = true, photoViewerStartIndex = action.index) }
+            }
+            HostDetailsAction.ClosePhotoViewer -> {
+                _state.update { it.copy(isPhotoViewerOpen = false) }
+            }
+            is HostDetailsAction.ToggleReviewGroupExpanded -> {
+                _state.update {
+                    val expanded = it.expandedReviewGroups
+                    val updated = if (action.index in expanded) expanded - action.index else expanded + action.index
+                    it.copy(expandedReviewGroups = updated)
+                }
+            }
+            HostDetailsAction.ShowMoreReviews -> {
+                _state.update {
+                    it.copy(visibleReviewGroupCount = (it.visibleReviewGroupCount + 2).coerceAtMost(it.reviewGroups.size))
+                }
+            }
+            HostDetailsAction.CopyProfileLink -> copyProfileLink()
+        }
+    }
+
+    private fun toggleFavorite() {
+        val nowFavorited = !_state.value.isFavorited
+        _state.update { it.copy(isFavorited = nowFavorited) }
+        sendEvent(
+            HostDetailsEvent.ShowSnackbar(
+                UiText.StringResource(
+                    if (nowFavorited) R.string.added_to_favorites else R.string.removed_from_favorites
+                )
+            )
+        )
+    }
+
+    private fun sendMessage() {
+        val draft = _state.value.messageDraft.trim()
+        if (draft.isEmpty()) return
+        _state.update { it.copy(messageDraft = "") }
+        sendEvent(HostDetailsEvent.ShowSnackbar(UiText.StringResource(R.string.message_sent)))
+    }
+
+    private fun sendReport() {
+        val text = _state.value.reportSheet.text.trim()
+        if (text.isEmpty()) {
+            _state.update {
+                it.copy(reportSheet = it.reportSheet.copy(error = UiText.StringResource(R.string.complaint_text_required)))
+            }
+            return
+        }
+        _state.update { it.copy(reportSheet = ReportSheetState()) }
+        sendEvent(HostDetailsEvent.ShowSnackbar(UiText.StringResource(R.string.complaint_sent_success)))
+    }
+
+    private fun copyProfileLink() {
+        val userId = _state.value.host?.userId ?: return
+        sendEvent(HostDetailsEvent.CopyToClipboard("$PROFILE_LINK_BASE_URL$userId"))
+        sendEvent(HostDetailsEvent.ShowSnackbar(UiText.StringResource(R.string.copied)))
+    }
+
+    private fun sendEvent(event: HostDetailsEvent) {
+        viewModelScope.launch { _events.send(event) }
     }
 
     private fun loadHost() {
@@ -115,9 +155,10 @@ class HostDetailsViewModel(
                 viewerId = null, // TODO: Phase 1 - real auth
             )
                 .onSuccess { userReviews ->
+                    val hostName = _state.value.host?.name.orEmpty()
                     _state.update {
                         it.copy(
-                            reviews = userReviews.threads.map { thread -> thread.toReviewThreadUi() },
+                            reviewGroups = userReviews.threads.map { thread -> thread.toReviewGroupUi(hostName) },
                             isLoadingReviews = false
                         )
                     }
@@ -125,12 +166,16 @@ class HostDetailsViewModel(
                 .onFailure { error ->
                     _state.update {
                         it.copy(
-                            reviews = emptyList(),
+                            reviewGroups = emptyList(),
                             isLoadingReviews = false,
                             reviewsError = error.toUiText()
                         )
                     }
                 }
         }
+    }
+
+    private companion object {
+        const val PROFILE_LINK_BASE_URL = "https://hipipl.com/host/"
     }
 }

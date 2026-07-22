@@ -69,12 +69,12 @@ internal fun LocationSearchOverlay(
             SearchTextField(
                 query = state.locationQuery,
                 onQueryChange = { onAction(HostsSearchAction.OnLocationQueryChange(it)) },
-                placeholder = stringResource(R.string.city_coordinates),
+                placeholder = stringResource(R.string.coordinates_city),
                 leadingIcon = {
                     IconButton(onClick = { onAction(HostsSearchAction.OnDismissSearchSheet) }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.cd_back)
+                            contentDescription = stringResource(R.string.button_back)
                         )
                     }
                 },

@@ -17,12 +17,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import me.alexy.hipipl.core.designsystem.GenderAccent
 import me.alexy.hipipl.core.designsystem.HiPeopleTheme
 import me.alexy.hipipl.core.designsystem.components.AmenityChipRow
 import me.alexy.hipipl.core.designsystem.components.CompassArrowIcon
 import me.alexy.hipipl.core.designsystem.components.NameWithAgeText
+import me.alexy.hipipl.core.designsystem.components.NetworkImage
 import me.alexy.hipipl.core.designsystem.components.ReferencesText
 import me.alexy.hipipl.core.designsystem.components.ResultCard
 import me.alexy.hipipl.core.designsystem.toColor
@@ -66,13 +66,14 @@ internal fun HostResultCard(
                 }
             }
             if (host.photoUrl != null) {
-                AsyncImage(
+                NetworkImage(
                     model = host.photoUrl,
                     contentDescription = stringResource(R.string.host_photo_description),
                     modifier = Modifier
                         .size(96.dp)
                         .clip(RoundedCornerShape(14.dp)),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
+                    indicatorSize = 20.dp,
                 )
             }
         }

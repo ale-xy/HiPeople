@@ -5,6 +5,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.boolean
+import kotlinx.serialization.json.contentOrNull
 import me.alexy.hipipl.core.data.dto.ReviewDto
 import me.alexy.hipipl.core.data.dto.ReviewThreadDto
 import me.alexy.hipipl.core.data.dto.UserReviewsResponseDto
@@ -12,17 +13,15 @@ import me.alexy.hipipl.core.domain.Review
 import me.alexy.hipipl.core.domain.ReviewThread
 import me.alexy.hipipl.core.domain.ReviewType
 import me.alexy.hipipl.core.domain.UserReviews
-import kotlinx.serialization.json.int
 
 fun UserReviewsResponseDto.toUserReviews(): UserReviews {
     val threads = mutableListOf<ReviewThread>()
     
     // Handle case where reviews is an empty array [] or an object with review threads
     if (reviews is JsonObject) {
-        val reviewsObj = reviews as JsonObject
-        
+
         // Iterate through each user's review thread (keyed by "u{userId}")
-        for ((_, threadElement) in reviewsObj) {
+        for ((_, threadElement) in reviews) {
             try {
                 val threadObj = threadElement.jsonObject
                 
@@ -56,13 +55,13 @@ fun UserReviewsResponseDto.toUserReviews(): UserReviews {
 private fun parseReviewFromJson(reviewObj: JsonObject): Review? {
     return try {
         // id and name are optional in v1 API - use defaults if missing
-        val id = reviewObj["id"]?.jsonPrimitive?.int ?: 0
-        val name = reviewObj["name"]?.jsonPrimitive?.content ?: "Unknown"
-        val date = reviewObj["date"]?.jsonPrimitive?.content
-        val text = reviewObj["text"]?.jsonPrimitive?.content ?: return null // text is required
-        val photo = reviewObj["photo"]?.jsonPrimitive?.content
-        val type = reviewObj["type"]?.jsonPrimitive?.content
-        val mutual = reviewObj["mutual"]?.jsonPrimitive?.boolean ?: false
+        val id = reviewObj["id"]?.jsonPrimitive?.contentOrNull?.toIntOrNull() ?: 0
+        val name = reviewObj["name"]?.jsonPrimitive?.contentOrNull ?: "Unknown"
+        val date = reviewObj["date"]?.jsonPrimitive?.contentOrNull
+        val text = reviewObj["text"]?.jsonPrimitive?.contentOrNull ?: return null // text is required
+        val photo = reviewObj["photo"]?.jsonPrimitive?.contentOrNull
+        val type = reviewObj["type"]?.jsonPrimitive?.contentOrNull
+        val mutual = reviewObj["mutual"]?.jsonPrimitive?.contentOrNull?.toBooleanStrictOrNull() ?: false
         
         Review(
             id = id,

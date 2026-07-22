@@ -18,3 +18,5 @@ local.properties
 **/build/
 # Local planning docs
 plans/
+# Local design assets/mockups
+design/

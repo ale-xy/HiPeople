@@ -2,12 +2,6 @@ package me.alexy.hipipl.core.designsystem
 
 import androidx.compose.ui.graphics.Color
 
-// Legacy ad-hoc colors, still referenced by HostDetailsScreen (donation/rating/contact tint).
-val LightGreen = Color(0xFFC4F9C6)
-val Yellow = Color(0xFFFFFF00)
-val LightPeach = Color(0xFFFFE4B5)
-val Blue = Color(0xFF0077FF)
-
 // Material3 palette per the "HiPeople — Material 3 Color Theme" spec (material-color-theme.md).
 val md_theme_light_primary = Color(0xFFC13D14)
 val md_theme_light_onPrimary = Color(0xFFFFFFFF)
@@ -42,6 +36,12 @@ object AppColors {
     val RatingAccent = Color(0xFFFF6B35)
     val Scrim = Color(0xFF281409)
     val OnSurfaceBodyCopy = Color(0xFF3A2E28)
+
+    /** Full-screen photo viewer background — darker than any existing surface token. */
+    val PhotoViewerBackground = Color(0xFF0B0705)
+
+    /** VK brand blue, used for the VK contact chip. */
+    val VkBrand = Color(0xFF4F7CB0)
 }
 
 /**

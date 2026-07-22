@@ -1,5 +1,6 @@
 package me.alexy.hipipl.core.presentation
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 
@@ -31,5 +32,16 @@ fun UiText.asString(): String {
     return when (this) {
         is UiText.DynamicString -> value
         is UiText.StringResource -> stringResource(id = id, formatArgs = args)
+    }
+}
+
+/**
+ * Non-composable variant for resolving a UiText outside composition
+ * (e.g. inside a coroutine launched from an event handler, such as showing a Snackbar).
+ */
+fun UiText.asString(context: Context): String {
+    return when (this) {
+        is UiText.DynamicString -> value
+        is UiText.StringResource -> context.getString(id, *args)
     }
 }

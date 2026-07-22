@@ -1,60 +1,61 @@
 package me.alexy.hipipl.feature.hostme.ui.hostdetails
 
-import me.alexy.hipipl.core.domain.ContactType
 import me.alexy.hipipl.core.domain.HostUser
-import me.alexy.hipipl.core.domain.ReviewThread
 import me.alexy.hipipl.core.domain.Review
+import me.alexy.hipipl.core.domain.ReviewThread
 import me.alexy.hipipl.core.domain.ReviewType
+import me.alexy.hipipl.core.domain.UserLanguage
+import me.alexy.hipipl.feature.hostme.ui.hostsearch.toGenderAccent
+import kotlin.math.roundToInt
 import java.time.format.DateTimeFormatter
 
 private val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
 fun HostUser.toHostDetailsUi(): HostDetailsUi {
     val ageText = if (age > 0) " ($age лет)" else ""
-    val nameWithAge = "$name$ageText"
-    
-    val ratingText = "$averageRating* ($totalReviews)"
-    
-    val languagesText = userLanguages.joinToString(", ") { 
-        "${it.langName}: ${it.level}" 
-    }
-    
-    val contactsMap = contacts.mapKeys { (type, _) ->
-        when (type) {
-            ContactType.VK -> "VK"
-            ContactType.TELEGRAM -> "Telegram"
-            ContactType.FACEBOOK -> "Facebook"
-            ContactType.PHONE -> "Phone"
-            ContactType.OTHER -> "Other"
-        }
-    }
+
+    val languages = userLanguages.map { it.toLanguageUi() }
+
+    val hostingParams = listOf(
+        HostingParamUi(type = HostingParamType.SEPARATE_ROOM, isOk = host.separateRoom),
+        HostingParamUi(type = HostingParamType.KIDS, isOk = host.allowKids),
+        HostingParamUi(type = HostingParamType.PETS, isOk = host.petsAtHome),
+    )
 
     return HostDetailsUi(
         userId = userId,
         name = name,
+        ageText = ageText,
+        genderAccent = gender.toGenderAccent(),
         photos = photos.map { it.url },
-        languagesText = languagesText,
+        totalReviews = totalReviews,
+        ratingValueText = if (averageRating > 0f) averageRating.toString() else null,
         cityText = host.city,
-        nameWithAge = nameWithAge,
-        ratingText = ratingText,
-        donateAmount = donate,
-        showDonation = donate > 0,
+        languages = languages,
+        hostingParams = hostingParams,
         description = description,
         hostText = host.text,
-        contacts = contactsMap,
-        hasContacts = contactsMap.isNotEmpty()
+        donateAmount = donate,
+        showDonation = donate > 0,
+        contacts = contacts,
+        hasContacts = contacts.isNotEmpty()
     )
 }
 
-fun ReviewThread.toReviewThreadUi(): MutualReviewUi {
-    // Map thread to the existing MutualReviewUi structure
-    // Take first received and first response for backward compatibility
-    val firstReceived = received.firstOrNull()
-    val firstResponse = response.firstOrNull()
-    
-    return MutualReviewUi(
-        review = firstReceived?.toReviewUi(null),
-        response = firstResponse?.toReviewUi(firstReceived?.authorName)
+private fun UserLanguage.toLanguageUi(): LanguageUi {
+    // Levels are reported on a 0..6 scale; the mockup shows up to 3 filled bars.
+    val filledBars = (level / 6f * 3).roundToInt().coerceIn(1, 3)
+    return LanguageUi(name = langName, filledBars = filledBars)
+}
+
+fun ReviewThread.toReviewGroupUi(hostName: String): ReviewGroupUi {
+    return ReviewGroupUi(
+        received = received.map { it.toReviewUi(receiverName = null) },
+        responses = response.map { reply ->
+            // API responses never carry a "name" field, so the reply's author is always the host being reviewed.
+            reply.toReviewUi(receiverName = received.firstOrNull()?.authorName).copy(authorName = hostName)
+        },
+        isMutual = isMutual,
     )
 }
 
