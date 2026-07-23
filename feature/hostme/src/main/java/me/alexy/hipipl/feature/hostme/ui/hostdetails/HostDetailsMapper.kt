@@ -1,10 +1,13 @@
 package me.alexy.hipipl.feature.hostme.ui.hostdetails
 
+import me.alexy.hipipl.core.domain.ActivityStatus
 import me.alexy.hipipl.core.domain.HostUser
 import me.alexy.hipipl.core.domain.Review
 import me.alexy.hipipl.core.domain.ReviewThread
 import me.alexy.hipipl.core.domain.ReviewType
 import me.alexy.hipipl.core.domain.UserLanguage
+import me.alexy.hipipl.core.presentation.UiText
+import me.alexy.hipipl.feature.hostitem.R
 import me.alexy.hipipl.feature.hostme.ui.hostsearch.toGenderAccent
 import kotlin.math.roundToInt
 import java.time.format.DateTimeFormatter
@@ -38,8 +41,17 @@ fun HostUser.toHostDetailsUi(): HostDetailsUi {
         donateAmount = donate,
         showDonation = donate > 0,
         contacts = contacts,
-        hasContacts = contacts.isNotEmpty()
+        hasContacts = contacts.isNotEmpty(),
+        hostListingId = host.hostId,
+        lastActivityText = lastActivity?.toActivityStatusText(),
+        vibeLabels = vibes.map { it.label },
     )
+}
+
+private fun ActivityStatus.toActivityStatusText(): UiText = when (this) {
+    ActivityStatus.TODAY -> UiText.StringResource(R.string.activity_status_today)
+    ActivityStatus.RECENTLY -> UiText.StringResource(R.string.activity_status_recently)
+    ActivityStatus.LONG_AGO -> UiText.StringResource(R.string.activity_status_long_ago)
 }
 
 private fun UserLanguage.toLanguageUi(): LanguageUi {

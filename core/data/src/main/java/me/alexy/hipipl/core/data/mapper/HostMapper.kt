@@ -7,11 +7,14 @@ import me.alexy.hipipl.core.data.dto.HostUserDto
 import me.alexy.hipipl.core.data.dto.PhotoDto
 import me.alexy.hipipl.core.data.dto.UserLangDto
 import me.alexy.hipipl.core.data.dto.HostsPageDto
+import me.alexy.hipipl.core.data.dto.UserVibeDto
+import me.alexy.hipipl.core.domain.ActivityStatus
 import me.alexy.hipipl.core.domain.ContactType
 import me.alexy.hipipl.core.domain.Gender
 import me.alexy.hipipl.core.domain.HostDetails
 import me.alexy.hipipl.core.domain.HostSearchResult
 import me.alexy.hipipl.core.domain.HostUser
+import me.alexy.hipipl.core.domain.HostVibe
 import me.alexy.hipipl.core.domain.Photo
 import me.alexy.hipipl.core.domain.UserLanguage
 
@@ -34,6 +37,8 @@ fun HostUserDto.toHostUser(): HostUser? {
         donate = donate ?: 0,
         userLanguages = userLangs?.mapNotNull { it.toUserLanguage() } ?: listOf(),
         host = hostData.toHostDetails(hostIdValue),
+        lastActivity = lastActivity.toActivityStatus(),
+        vibes = userVibes?.mapNotNull { it.toHostVibe() } ?: listOf(),
     )
 }
 
@@ -100,8 +105,24 @@ private fun ContactsDto.toContactMap(): Map<ContactType, String> {
     tg?.let { contactMap[ContactType.TELEGRAM] = it }
     tel?.let { contactMap[ContactType.PHONE] = it }
     fb?.let { contactMap[ContactType.FACEBOOK] = it.toString() }
+    wa?.let { contactMap[ContactType.WHATSAPP] = it }
     extra?.let { contactMap[ContactType.OTHER] = it }
     return contactMap.toMap()
+}
+
+private fun String?.toActivityStatus(): ActivityStatus? {
+    return when (this) {
+        "today" -> ActivityStatus.TODAY
+        "recently" -> ActivityStatus.RECENTLY
+        "long ago" -> ActivityStatus.LONG_AGO
+        else -> null
+    }
+}
+
+private fun UserVibeDto.toHostVibe(): HostVibe? {
+    val vibeLabel = label ?: return null
+    val vibeCode = code ?: return null
+    return HostVibe(label = vibeLabel, code = vibeCode)
 }
 
 private fun UserLangDto.toUserLanguage(): UserLanguage? {

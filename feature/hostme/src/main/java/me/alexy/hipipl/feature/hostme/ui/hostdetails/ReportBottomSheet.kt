@@ -29,10 +29,11 @@ import me.alexy.hipipl.feature.hostitem.R
 fun ReportBottomSheet(
     text: String,
     error: UiText?,
+    modifier: Modifier = Modifier,
+    isSending: Boolean = false,
     onTextChange: (String) -> Unit,
     onDismiss: () -> Unit,
     onSend: () -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -71,6 +72,7 @@ fun ReportBottomSheet(
                 }
                 Button(
                     onClick = onSend,
+                    enabled = !isSending,
                     modifier = Modifier
                         .weight(1f)
                         .height(46.dp),

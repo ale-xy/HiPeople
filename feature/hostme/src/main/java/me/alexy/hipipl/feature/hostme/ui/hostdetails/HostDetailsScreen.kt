@@ -115,6 +115,7 @@ fun HostDetailsScreen(
         ReportBottomSheet(
             text = state.reportSheet.text,
             error = state.reportSheet.error,
+            isSending = state.reportSheet.isSending,
             onTextChange = { onAction(HostDetailsAction.OnReportTextChange(it)) },
             onDismiss = { onAction(HostDetailsAction.DismissReport) },
             onSend = { onAction(HostDetailsAction.SendReport) },
@@ -166,6 +167,8 @@ private fun HostDetailsContent(
                     totalReviews = host.totalReviews,
                     ratingValueText = host.ratingValueText,
                     cityText = host.cityText,
+                    lastActivityText = host.lastActivityText,
+                    vibeLabels = host.vibeLabels,
                 )
 
                 HorizontalDivider(color = AppColors.Divider)
@@ -176,14 +179,17 @@ private fun HostDetailsContent(
 
                 AboutCard(description = host.description)
 
-                ContactsCard(
-                    contacts = host.contacts,
-                    isRevealed = state.isContactsRevealed,
-                    messageDraft = state.messageDraft,
-                    onRevealContacts = { onAction(HostDetailsAction.RevealContacts) },
-                    onMessageDraftChange = { onAction(HostDetailsAction.OnMessageDraftChange(it)) },
-                    onSendMessage = { onAction(HostDetailsAction.SendMessage) },
-                )
+                if (host.hasContacts) {
+                    ContactsCard(
+                        contactsState = state.contactsState,
+                        messageDraft = state.messageDraft,
+                        isSendingMessage = state.isSendingMessage,
+                        canSendMessage = state.canSendMessage,
+                        onRevealContacts = { onAction(HostDetailsAction.RevealContacts) },
+                        onMessageDraftChange = { onAction(HostDetailsAction.OnMessageDraftChange(it)) },
+                        onSendMessage = { onAction(HostDetailsAction.SendMessage) },
+                    )
+                }
 
                 ActionRow(
                     isFavorited = state.isFavorited,

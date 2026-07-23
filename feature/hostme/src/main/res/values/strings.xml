@@ -89,7 +89,21 @@
     <string name="contact_type_vk">VK</string>
     <string name="contact_type_telegram">Telegram</string>
     <string name="contact_type_facebook">Facebook</string>
+    <string name="contact_type_whatsapp">WhatsApp</string>
     <string name="contact_type_phone">Телефон</string>
     <string name="contact_type_other">Другое</string>
+
+    <!-- Stage 2: real backend wiring for favorites/contacts/messages/report -->
+    <string name="favorite_toggle_error">Не удалось обновить избранное</string>
+    <string name="complaint_sent_error">Не удалось отправить жалобу</string>
+    <string name="contacts_profile_incomplete">Заполните профиль (фото, языки, дата рождения), чтобы увидеть контакты</string>
+    <string name="contacts_privacy_hidden">Приватность скрывает контакты этого пользователя</string>
+    <string name="contacts_unanswered_review">Прежде чем открыть контакты, ответьте на отзыв о вас</string>
+    <string name="contacts_load_error">Не удалось загрузить контакты</string>
+    <string name="message_send_error">Не удалось отправить сообщение</string>
+    <string name="message_send_rate_limited">Дождитесь ответа, прежде чем отправить ещё одно сообщение</string>
+    <string name="activity_status_today">Был(а) сегодня</string>
+    <string name="activity_status_recently">Был(а) недавно</string>
+    <string name="activity_status_long_ago">Давно не заходил(а)</string>
 
 </resources>

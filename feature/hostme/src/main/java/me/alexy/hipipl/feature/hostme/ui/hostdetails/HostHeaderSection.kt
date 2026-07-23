@@ -23,12 +23,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import me.alexy.hipipl.core.designsystem.AppColors
 import me.alexy.hipipl.core.designsystem.GenderAccent
 import me.alexy.hipipl.core.designsystem.HiPeopleTheme
 import me.alexy.hipipl.core.designsystem.components.NameWithAgeText
 import me.alexy.hipipl.core.designsystem.components.PillChip
 import me.alexy.hipipl.core.designsystem.components.ReferencesText
 import me.alexy.hipipl.core.designsystem.toColor
+import me.alexy.hipipl.core.presentation.UiText
+import me.alexy.hipipl.core.presentation.asString
 import me.alexy.hipipl.feature.hostitem.R
 import androidx.core.net.toUri
 
@@ -41,6 +44,8 @@ fun HostHeaderSection(
     ratingValueText: String?,
     cityText: String,
     modifier: Modifier = Modifier,
+    lastActivityText: UiText? = null,
+    vibeLabels: List<String> = emptyList(),
 ) {
     val context = LocalContext.current
 
@@ -64,6 +69,20 @@ fun HostHeaderSection(
         }
 
         ReferencesText(referenceCount = totalReviews, scoreText = ratingValueText)
+
+        if (lastActivityText != null) {
+            Text(
+                text = lastActivityText.asString(),
+                style = MaterialTheme.typography.labelMedium,
+                color = AppColors.Success,
+            )
+        }
+
+        if (vibeLabels.isNotEmpty()) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                vibeLabels.forEach { label -> PillChip(text = label) }
+            }
+        }
 
         if (cityText.isNotBlank()) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {

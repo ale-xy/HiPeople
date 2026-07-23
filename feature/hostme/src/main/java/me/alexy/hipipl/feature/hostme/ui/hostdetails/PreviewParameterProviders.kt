@@ -29,6 +29,9 @@ private val sampleHostDetails = HostDetailsUi(
     showDonation = true,
     contacts = mapOf(ContactType.TELEGRAM to "annahost", ContactType.PHONE to "+79001234567"),
     hasContacts = true,
+    hostListingId = 1,
+    lastActivityText = UiText.StringResource(me.alexy.hipipl.feature.hostitem.R.string.activity_status_today),
+    vibeLabels = listOf("Early bird", "Vegetarian"),
 )
 
 private val sampleReviewGroups = listOf(

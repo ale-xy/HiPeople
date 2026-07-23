@@ -8,5 +8,6 @@ data class ContactsDto(
     val tg: String? = null,
     val tel: String? = null,
     val fb: Long? = null,
+    val wa: String? = null,
     val extra: String? = null
 )

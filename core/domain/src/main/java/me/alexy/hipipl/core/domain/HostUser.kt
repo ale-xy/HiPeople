@@ -15,7 +15,13 @@ data class HostUser(
     val donate: Int,
     val userLanguages: List<UserLanguage>,
     val host: HostDetails,
+    val lastActivity: ActivityStatus? = null,
+    val vibes: List<HostVibe> = emptyList(),
 )
+
+enum class ActivityStatus { TODAY, RECENTLY, LONG_AGO }
+
+data class HostVibe(val label: String, val code: String)
 
 data class UserLanguage(
     val langCode: String,
@@ -46,6 +52,7 @@ enum class ContactType {
     VK,
     TELEGRAM,
     FACEBOOK,
+    WHATSAPP,
     PHONE,
     OTHER
 }

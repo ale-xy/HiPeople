@@ -12,8 +12,11 @@ data class HostDetailsState(
     val reviewGroups: List<ReviewGroupUi> = emptyList(),
     val reviewsError: UiText? = null,
     val isFavorited: Boolean = false,
-    val isContactsRevealed: Boolean = false,
+    val isTogglingFavorite: Boolean = false,
+    val contactsState: ContactsUiState = ContactsUiState.Idle,
     val messageDraft: String = "",
+    val isSendingMessage: Boolean = false,
+    val canSendMessage: Boolean = true,
     val reportSheet: ReportSheetState = ReportSheetState(),
     val photoViewerStartIndex: Int = 0,
     val isPhotoViewerOpen: Boolean = false,
@@ -21,9 +24,19 @@ data class HostDetailsState(
     val visibleReviewGroupCount: Int = 2,
 )
 
+sealed interface ContactsUiState {
+    data object Idle : ContactsUiState
+    data object Loading : ContactsUiState
+    data class Revealed(val chips: List<ContactChipUi>) : ContactsUiState
+    data class Blocked(val message: UiText) : ContactsUiState
+}
+
+data class ContactChipUi(val type: ContactType, val value: String)
+
 data class ReportSheetState(
     val isOpen: Boolean = false,
     val text: String = "",
+    val isSending: Boolean = false,
     val error: UiText? = null,
 )
 
@@ -65,6 +78,9 @@ data class HostDetailsUi(
     val showDonation: Boolean,
     val contacts: Map<ContactType, String>,
     val hasContacts: Boolean,
+    val hostListingId: Int,
+    val lastActivityText: UiText?,
+    val vibeLabels: List<String>,
 )
 
 data class LanguageUi(
