@@ -39,6 +39,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun HostDetailsScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToAuth: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HostDetailsViewModel = koinViewModel()
 ) {
@@ -58,6 +59,7 @@ fun HostDetailsScreen(
                     clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(event.text, event.text)))
                 }
             }
+            HostDetailsEvent.NavigateToAuth -> onNavigateToAuth()
         }
     }
 

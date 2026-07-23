@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import me.alexy.hipipl.core.data.SessionManager
 import me.alexy.hipipl.core.domain.FavoritesRemoteDataSource
 import me.alexy.hipipl.core.domain.HostContacts
 import me.alexy.hipipl.core.domain.HostRemoteDataSource
@@ -27,6 +28,7 @@ class HostDetailsViewModel(
     private val favoritesDataSource: FavoritesRemoteDataSource,
     private val supportDataSource: SupportRemoteDataSource,
     private val messagingDataSource: MessagingRemoteDataSource,
+    private val sessionManager: SessionManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -86,11 +88,16 @@ class HostDetailsViewModel(
         val host = _state.value.host ?: return
         if (_state.value.isTogglingFavorite) return
 
-        val wasFavorited = _state.value.isFavorited
-        val nowFavorited = !wasFavorited
-        _state.update { it.copy(isFavorited = nowFavorited, isTogglingFavorite = true) }
-
         viewModelScope.launch {
+            if (sessionManager.currentUserId() == null) {
+                sendEvent(HostDetailsEvent.NavigateToAuth)
+                return@launch
+            }
+
+            val wasFavorited = _state.value.isFavorited
+            val nowFavorited = !wasFavorited
+            _state.update { it.copy(isFavorited = nowFavorited, isTogglingFavorite = true) }
+
             val result = if (nowFavorited) {
                 favoritesDataSource.addFavorite(contentId = host.hostListingId, type = FAVORITE_TYPE_HOST)
             } else {
@@ -118,9 +125,15 @@ class HostDetailsViewModel(
         val host = _state.value.host ?: return
         if (_state.value.contactsState is ContactsUiState.Loading) return
 
-        _state.update { it.copy(contactsState = ContactsUiState.Loading) }
         viewModelScope.launch {
-            messagingDataSource.getContacts(userId = TEMP_USER_ID, targetUserId = host.userId)
+            val userId = sessionManager.currentUserId()
+            if (userId == null) {
+                sendEvent(HostDetailsEvent.NavigateToAuth)
+                return@launch
+            }
+
+            _state.update { it.copy(contactsState = ContactsUiState.Loading) }
+            messagingDataSource.getContacts(userId = userId, targetUserId = host.userId)
                 .onSuccess { contacts ->
                     _state.update { it.copy(contactsState = contacts.toContactsUiState()) }
                 }
@@ -144,8 +157,13 @@ class HostDetailsViewModel(
         val draft = _state.value.messageDraft.trim()
         if (draft.isEmpty() || _state.value.isSendingMessage || !_state.value.canSendMessage) return
 
-        _state.update { it.copy(isSendingMessage = true) }
         viewModelScope.launch {
+            if (sessionManager.currentUserId() == null) {
+                sendEvent(HostDetailsEvent.NavigateToAuth)
+                return@launch
+            }
+
+            _state.update { it.copy(isSendingMessage = true) }
             messagingDataSource.sendMessage(
                 targetUserId = host.userId,
                 listingId = host.hostListingId,
@@ -180,13 +198,14 @@ class HostDetailsViewModel(
         _state.update { it.copy(reportSheet = it.reportSheet.copy(isSending = true, error = null)) }
 
         viewModelScope.launch {
+            val userId = sessionManager.currentUserId()
             supportDataSource.submitComplaint(
                 message = text,
-                userId = TEMP_USER_ID,
+                userId = userId,
                 additionalData = buildMap {
                     put("screen", "host_details")
                     if (host != null) put("host_user_id", host.userId.toString())
-                    put("viewer_user_id", TEMP_USER_ID.toString())
+                    if (userId != null) put("viewer_user_id", userId.toString())
                 },
             )
                 .onSuccess {
@@ -215,7 +234,7 @@ class HostDetailsViewModel(
 
             hostDataSource.getHost(
                 hostId = args.hostId,
-                userId = null, // TODO: Phase 1 - real auth
+                userId = sessionManager.currentUserId(),
             )
                 .onSuccess { host ->
                     _state.update {
@@ -245,7 +264,7 @@ class HostDetailsViewModel(
 
             hostDataSource.getReviews(
                 userId = userId,
-                viewerId = null, // TODO: Phase 1 - real auth
+                viewerId = sessionManager.currentUserId(),
             )
                 .onSuccess { userReviews ->
                     val hostName = _state.value.host?.name.orEmpty()
@@ -271,8 +290,5 @@ class HostDetailsViewModel(
     private companion object {
         const val PROFILE_LINK_BASE_URL = "https://hipipl.com/host/"
         const val FAVORITE_TYPE_HOST = "host"
-
-        // TODO: Replace with real auth from Phase 1 of IMPLEMENTATION_PLAN.md
-        const val TEMP_USER_ID = 1
     }
 }

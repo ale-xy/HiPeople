@@ -1,3 +1,5 @@
+import java.io.FileInputStream
+import java.util.Properties
 
 @Suppress("DSL_SCOPE_VIOLATION") // Remove when fixed https://youtrack.jetbrains.com/issue/KTIJ-19369
 plugins {
@@ -7,18 +9,32 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        FileInputStream(localPropertiesFile).use { load(it) }
+    }
+}
+
 android {
-    namespace = "me.alexy.hipipl.feature.hostitem"
+    namespace = "me.alexy.hipipl.feature.auth"
     compileSdk = 37
 
     defaultConfig {
         minSdk = 26
+
+        // Must match the redirect_uri VK ID's SDK uses internally when requesting the auth code
+        // (same VKIDRedirectScheme/VKIDRedirectHost keys as :app's manifest placeholders),
+        // since POST /api/v1/login_vk validates it against what VK issued the code for.
+        val vkidRedirectScheme = localProperties.getProperty("VKIDRedirectScheme") ?: "vk0"
+        val vkidRedirectHost = localProperties.getProperty("VKIDRedirectHost") ?: "vk.ru"
+        buildConfigField("String", "VKID_REDIRECT_URI", "\"$vkidRedirectScheme://$vkidRedirectHost/blank.html\"")
     }
 
     buildFeatures {
         compose = true
         aidl = false
-        buildConfig = false
+        buildConfig = true
         renderScript = false
         shaders = false
     }
@@ -28,7 +44,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
         isCoreLibraryDesugaringEnabled = true
     }
-
 }
 
 kotlin {
@@ -43,7 +58,6 @@ dependencies {
     implementation(project(":core:presentation"))
     implementation(project(":core:designsystem"))
 
-    // Core Android dependencies
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.androidx.activity.compose)
 
@@ -63,23 +77,15 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material.icons.core)
-    implementation(libs.androidx.compose.material.icons.extended)
-    implementation(libs.coil.compose)
-    implementation(libs.coil.network.okhttp)
-    implementation(libs.github.textflow.material3)
+
+    // VK ID
+    implementation(libs.vkid)
+    implementation(libs.vkid.onetap.compose)
 
     // Tooling
     debugImplementation(libs.androidx.compose.ui.tooling)
-    // Instrumented tests
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    // Local tests: jUnit, coroutines, Android runner
+    // Local tests
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
-
-    // Instrumented tests: jUnit rules and runners
-    androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.androidx.test.runner)
 }

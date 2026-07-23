@@ -1,3 +1,5 @@
+import java.io.FileInputStream
+import java.util.Properties
 
 @Suppress("DSL_SCOPE_VIOLATION") // Remove when fixed https://youtrack.jetbrains.com/issue/KTIJ-19369
 plugins {
@@ -6,6 +8,19 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.serialization)
 
+}
+
+// VK ID app credentials, read from the gitignored local.properties rather than committed -
+// create a VK ID app at https://id.vk.ru/business/go and add these four keys there:
+//   VKIDClientID=<app_id>
+//   VKIDClientSecret=<client_secret>
+//   VKIDRedirectHost=vk.ru
+//   VKIDRedirectScheme=vk<app_id>
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        FileInputStream(localPropertiesFile).use { load(it) }
+    }
 }
 
 android {
@@ -22,9 +37,21 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        addManifestPlaceholders(
+            mapOf(
+                "VKIDClientID" to (localProperties.getProperty("VKIDClientID") ?: ""),
+                "VKIDClientSecret" to (localProperties.getProperty("VKIDClientSecret") ?: ""),
+                "VKIDRedirectHost" to (localProperties.getProperty("VKIDRedirectHost") ?: "vk.ru"),
+                "VKIDRedirectScheme" to (localProperties.getProperty("VKIDRedirectScheme") ?: "vk0"),
+            )
+        )
     }
 
     buildTypes {
+        getByName("debug") {
+            applicationIdSuffix = ".debug"
+        }
         getByName("release") {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
@@ -74,6 +101,7 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:domain"))
     implementation(project(":feature:hostme"))
+    implementation(project(":feature:auth"))
 
     // Core Android dependencies
     implementation(libs.androidx.core.ktx)
@@ -99,6 +127,9 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+
+    // VK ID (VKID.init() call in HiPeople.kt)
+    implementation(libs.vkid)
 
     // Tooling
     coreLibraryDesugaring(libs.desugar.jdk.libs)

@@ -21,11 +21,6 @@ class KtorHostDataSource(
     private val httpClient: HttpClient
 ) : HostRemoteDataSource {
 
-    // TODO: Replace with real auth from Phase 1 of IMPLEMENTATION_PLAN.md
-    private companion object {
-        const val TEMP_USER_ID = 1
-    }
-
     override suspend fun searchHosts(
         locationId: Int,
         locationType: String,

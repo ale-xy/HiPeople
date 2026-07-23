@@ -59,6 +59,7 @@ sealed interface HostDetailsAction {
 sealed interface HostDetailsEvent {
     data class ShowSnackbar(val message: UiText) : HostDetailsEvent
     data class CopyToClipboard(val text: String) : HostDetailsEvent
+    data object NavigateToAuth : HostDetailsEvent
 }
 
 data class HostDetailsUi(
