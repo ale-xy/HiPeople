@@ -1,6 +1,7 @@
 package me.alexy.hipipl.feature.hostme.ui.hostdetails
 
 import me.alexy.hipipl.core.designsystem.GenderAccent
+import me.alexy.hipipl.core.domain.ActivityStatus
 import me.alexy.hipipl.core.domain.ContactType
 import me.alexy.hipipl.core.presentation.UiText
 
@@ -54,11 +55,16 @@ sealed interface HostDetailsAction {
     data class ToggleReviewGroupExpanded(val index: Int) : HostDetailsAction
     data object ShowMoreReviews : HostDetailsAction
     data object CopyProfileLink : HostDetailsAction
+    data object AddReview : HostDetailsAction
+    data class Translate(val text: String) : HostDetailsAction
+    data class OpenCityMap(val preferGoogleMaps: Boolean) : HostDetailsAction
 }
 
 sealed interface HostDetailsEvent {
     data class ShowSnackbar(val message: UiText) : HostDetailsEvent
     data class CopyToClipboard(val text: String) : HostDetailsEvent
+    data class OpenUrl(val url: String) : HostDetailsEvent
+    data class OpenMap(val query: String, val preferGoogleMaps: Boolean) : HostDetailsEvent
     data object NavigateToAuth : HostDetailsEvent
 }
 
@@ -77,11 +83,10 @@ data class HostDetailsUi(
     val hostText: String,
     val donateAmount: Int,
     val showDonation: Boolean,
-    val contacts: Map<ContactType, String>,
-    val hasContacts: Boolean,
     val hostListingId: Int,
     val lastActivityText: UiText?,
-    val vibeLabels: List<String>,
+    val lastActivityStatus: ActivityStatus?,
+    val vibes: List<UiText>,
 )
 
 data class LanguageUi(

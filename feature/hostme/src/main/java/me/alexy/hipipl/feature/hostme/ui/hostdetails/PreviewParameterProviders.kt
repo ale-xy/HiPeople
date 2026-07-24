@@ -2,7 +2,7 @@ package me.alexy.hipipl.feature.hostme.ui.hostdetails
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import me.alexy.hipipl.core.designsystem.GenderAccent
-import me.alexy.hipipl.core.domain.ContactType
+import me.alexy.hipipl.core.domain.ActivityStatus
 import me.alexy.hipipl.core.presentation.UiText
 
 private val sampleHostDetails = HostDetailsUi(
@@ -27,11 +27,10 @@ private val sampleHostDetails = HostDetailsUi(
     hostText = "I have a spare room and love meeting travelers.",
     donateAmount = 3,
     showDonation = true,
-    contacts = mapOf(ContactType.TELEGRAM to "annahost", ContactType.PHONE to "+79001234567"),
-    hasContacts = true,
     hostListingId = 1,
     lastActivityText = UiText.StringResource(me.alexy.hipipl.feature.hostitem.R.string.activity_status_today),
-    vibeLabels = listOf("Early bird", "Vegetarian"),
+    lastActivityStatus = ActivityStatus.TODAY,
+    vibes = listOf(UiText.DynamicString("Early bird"), UiText.DynamicString("Vegetarian")),
 )
 
 private val sampleReviewGroups = listOf(

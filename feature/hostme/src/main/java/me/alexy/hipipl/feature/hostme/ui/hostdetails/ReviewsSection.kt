@@ -42,6 +42,7 @@ fun ReviewsSection(
     errorText: String?,
     onToggleGroupExpanded: (Int) -> Unit,
     onShowMoreReviews: () -> Unit,
+    onAddReview: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -64,6 +65,7 @@ fun ReviewsSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
+                .clickable(onClick = onAddReview)
                 .padding(vertical = 12.dp),
         )
 
@@ -262,6 +264,7 @@ private fun ReviewsSectionPreview() {
             errorText = null,
             onToggleGroupExpanded = {},
             onShowMoreReviews = {},
+            onAddReview = {},
         )
     }
 }

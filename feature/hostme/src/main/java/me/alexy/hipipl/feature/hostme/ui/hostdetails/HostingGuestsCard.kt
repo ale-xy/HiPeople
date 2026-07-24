@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -37,14 +38,24 @@ import me.alexy.hipipl.feature.hostitem.R
 fun HostingGuestsCard(
     hostText: String,
     hostingParams: List<HostingParamUi>,
+    onTranslate: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     ResultCard(modifier = modifier) {
-        Text(
-            text = stringResource(R.string.host_description),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = stringResource(R.string.host_description),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            if (hostText.isNotBlank()) {
+                TranslateButton(onClick = onTranslate)
+            }
+        }
         if (hostText.isNotBlank()) {
             Text(
                 text = hostText,
@@ -127,6 +138,7 @@ private fun HostingGuestsCardPreview() {
                 HostingParamUi(HostingParamType.SEPARATE_ROOM, isOk = true),
                 HostingParamUi(HostingParamType.KIDS, isOk = false),
             ),
+            onTranslate = {},
         )
     }
 }

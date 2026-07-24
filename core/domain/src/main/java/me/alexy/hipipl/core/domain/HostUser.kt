@@ -21,7 +21,31 @@ data class HostUser(
 
 enum class ActivityStatus { TODAY, RECENTLY, LONG_AGO }
 
-data class HostVibe(val label: String, val code: String)
+data class HostVibe(val label: String, val code: VibeCode)
+
+// One entry per `code` returned by GET /api/v1/vibes; UNKNOWN covers codes the app doesn't recognize yet.
+enum class VibeCode {
+    ACTIVE_SPORT,
+    AGAINST_ALCOHOL,
+    AMBIVERT,
+    BUSINESS,
+    CREATIVITY,
+    DONT_CARE,
+    ESCAPISM,
+    ESOTERICS,
+    EXTROVERT,
+    HEALTHY_LIFESTYLE,
+    INTROVERT,
+    LUXURY_FASHION,
+    MELANCHOLY,
+    NEUTRAL_ALCOHOL,
+    PARTIES,
+    PRO_ALCOHOL,
+    SCIENCE,
+    SILENCE,
+    SOULFUL_EVENINGS,
+    UNKNOWN,
+}
 
 data class UserLanguage(
     val langCode: String,

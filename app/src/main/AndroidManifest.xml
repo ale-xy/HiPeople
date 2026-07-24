@@ -4,6 +4,15 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <!-- Package-visibility (API 30+): without this, the app can't detect a Custom Tabs-capable
+         browser and androidx.browser silently falls back to a plain full-screen ACTION_VIEW intent,
+         which ignores Partial Custom Tabs' initial-height/rounded-corner extras entirely. -->
+    <queries>
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
+    </queries>
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"

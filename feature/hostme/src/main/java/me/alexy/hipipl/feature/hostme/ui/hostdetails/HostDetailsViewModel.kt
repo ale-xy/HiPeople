@@ -22,6 +22,8 @@ import me.alexy.hipipl.core.presentation.UiText
 import me.alexy.hipipl.core.presentation.toUiText
 import me.alexy.hipipl.feature.hostitem.R
 import me.alexy.hipipl.feature.hostme.HostDetailsRoute
+import java.net.URLEncoder
+import java.util.Locale
 
 class HostDetailsViewModel(
     private val hostDataSource: HostRemoteDataSource,
@@ -81,6 +83,16 @@ class HostDetailsViewModel(
                 }
             }
             HostDetailsAction.CopyProfileLink -> copyProfileLink()
+            HostDetailsAction.AddReview -> {
+                sendEvent(HostDetailsEvent.ShowSnackbar(UiText.StringResource(R.string.review_form_coming_soon)))
+            }
+            is HostDetailsAction.Translate -> {
+                sendEvent(HostDetailsEvent.OpenUrl(action.text.toGoogleTranslateUrl()))
+            }
+            is HostDetailsAction.OpenCityMap -> {
+                val cityText = _state.value.host?.cityText ?: return
+                sendEvent(HostDetailsEvent.OpenMap(query = cityText, preferGoogleMaps = action.preferGoogleMaps))
+            }
         }
     }
 
@@ -226,6 +238,12 @@ class HostDetailsViewModel(
 
     private fun sendEvent(event: HostDetailsEvent) {
         viewModelScope.launch { _events.send(event) }
+    }
+
+    private fun String.toGoogleTranslateUrl(): String {
+        val targetLang = Locale.getDefault().language
+        val encodedText = URLEncoder.encode(this, "UTF-8")
+        return "https://translate.google.com/?sl=auto&tl=$targetLang&text=$encodedText"
     }
 
     private fun loadHost() {

@@ -8,7 +8,8 @@ import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
-import io.ktor.http.isSuccess
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.SerializationException
 import me.alexy.hipipl.core.data.dto.ApiResponse
@@ -36,6 +37,7 @@ suspend inline fun <reified Request, reified Response : Any> HttpClient.post(
 ): Result<Response, DataError.Network> {
     return safeCall {
         post(route) {
+            contentType(ContentType.Application.Json)
             setBody(body)
         }
     }

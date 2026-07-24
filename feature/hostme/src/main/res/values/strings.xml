@@ -47,6 +47,8 @@
     <string name="user_about">Обо мне:</string>
     <string name="user_contacts">Контакты:</string>
     <string name="host_description">Принимаю гостей:</string>
+    <string name="button_translate">Перевод</string>
+    <string name="review_form_coming_soon">Форма отзыва скоро будет доступна</string>
     <string name="host_separate_yes">Отдельная спальня</string>
     <string name="host_separate_no">Нет отдельной спальни для гостей</string>
     <string name="host_child_yes">Можно с детьми</string>
@@ -92,6 +94,27 @@
     <string name="contact_type_whatsapp">WhatsApp</string>
     <string name="contact_type_phone">Телефон</string>
     <string name="contact_type_other">Другое</string>
+
+    <!-- Vibes: keys/text taken from design/locales-android/values-ru/strings.xml (GET /api/v1/vibes `code` -> vibe_<code>) -->
+    <string name="vibe_active_sport">Активный отдых/спорт</string>
+    <string name="vibe_against_alcohol">Против алкоголя</string>
+    <string name="vibe_ambivert">Амбиверт (среднее)</string>
+    <string name="vibe_business">Бизнес</string>
+    <string name="vibe_creativity">Творчество</string>
+    <string name="vibe_dont_care">Пофигизм (Don\'t Worry, B)</string>
+    <string name="vibe_escapism">Книги/сериалы/игры (Эскапизм)</string>
+    <string name="vibe_esoterics">Эзотерика</string>
+    <string name="vibe_extrovert">Экстраверт</string>
+    <string name="vibe_healthy_lifestyle">ЗОЖ</string>
+    <string name="vibe_introvert">Интроверт</string>
+    <string name="vibe_luxury_fashion">Лакшери/мода</string>
+    <string name="vibe_melancholy">Меланхолия (грустинка)</string>
+    <string name="vibe_neutral_alcohol">Ни за и не против алко</string>
+    <string name="vibe_parties">Тусовки</string>
+    <string name="vibe_pro_alcohol">Алкоголь</string>
+    <string name="vibe_science">Наука (умею душнить)</string>
+    <string name="vibe_silence">Тишина</string>
+    <string name="vibe_soulful_evenings">Душевные вечера/разговоры</string>
 
     <!-- Stage 2: real backend wiring for favorites/contacts/messages/report -->
     <string name="favorite_toggle_error">Не удалось обновить избранное</string>

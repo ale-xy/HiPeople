@@ -4,9 +4,9 @@ import me.alexy.hipipl.core.data.dto.ContactsDto
 import me.alexy.hipipl.core.data.dto.HostDto
 import me.alexy.hipipl.core.data.dto.HostListItemDto
 import me.alexy.hipipl.core.data.dto.HostUserDto
+import me.alexy.hipipl.core.data.dto.HostsPageDto
 import me.alexy.hipipl.core.data.dto.PhotoDto
 import me.alexy.hipipl.core.data.dto.UserLangDto
-import me.alexy.hipipl.core.data.dto.HostsPageDto
 import me.alexy.hipipl.core.data.dto.UserVibeDto
 import me.alexy.hipipl.core.domain.ActivityStatus
 import me.alexy.hipipl.core.domain.ContactType
@@ -17,6 +17,7 @@ import me.alexy.hipipl.core.domain.HostUser
 import me.alexy.hipipl.core.domain.HostVibe
 import me.alexy.hipipl.core.domain.Photo
 import me.alexy.hipipl.core.domain.UserLanguage
+import me.alexy.hipipl.core.domain.VibeCode
 
 // Map HostUserDto (details endpoint) to HostUser
 fun HostUserDto.toHostUser(): HostUser? {
@@ -122,7 +123,30 @@ private fun String?.toActivityStatus(): ActivityStatus? {
 private fun UserVibeDto.toHostVibe(): HostVibe? {
     val vibeLabel = label ?: return null
     val vibeCode = code ?: return null
-    return HostVibe(label = vibeLabel, code = vibeCode)
+    return HostVibe(label = vibeLabel, code = vibeCode.toVibeCode())
+}
+
+private fun String.toVibeCode(): VibeCode = when (this) {
+    "active_sport" -> VibeCode.ACTIVE_SPORT
+    "against_alcohol" -> VibeCode.AGAINST_ALCOHOL
+    "ambivert" -> VibeCode.AMBIVERT
+    "business" -> VibeCode.BUSINESS
+    "creativity" -> VibeCode.CREATIVITY
+    "dont_care" -> VibeCode.DONT_CARE
+    "escapism" -> VibeCode.ESCAPISM
+    "esoterics" -> VibeCode.ESOTERICS
+    "extrovert" -> VibeCode.EXTROVERT
+    "healthy_lifestyle" -> VibeCode.HEALTHY_LIFESTYLE
+    "introvert" -> VibeCode.INTROVERT
+    "luxury_fashion" -> VibeCode.LUXURY_FASHION
+    "melancholy" -> VibeCode.MELANCHOLY
+    "neutral_alcohol" -> VibeCode.NEUTRAL_ALCOHOL
+    "parties" -> VibeCode.PARTIES
+    "pro_alcohol" -> VibeCode.PRO_ALCOHOL
+    "science" -> VibeCode.SCIENCE
+    "silence" -> VibeCode.SILENCE
+    "soulful_evenings" -> VibeCode.SOULFUL_EVENINGS
+    else -> VibeCode.UNKNOWN
 }
 
 private fun UserLangDto.toUserLanguage(): UserLanguage? {

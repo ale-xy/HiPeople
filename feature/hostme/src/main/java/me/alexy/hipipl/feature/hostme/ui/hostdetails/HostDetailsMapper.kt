@@ -2,15 +2,17 @@ package me.alexy.hipipl.feature.hostme.ui.hostdetails
 
 import me.alexy.hipipl.core.domain.ActivityStatus
 import me.alexy.hipipl.core.domain.HostUser
+import me.alexy.hipipl.core.domain.HostVibe
 import me.alexy.hipipl.core.domain.Review
 import me.alexy.hipipl.core.domain.ReviewThread
 import me.alexy.hipipl.core.domain.ReviewType
 import me.alexy.hipipl.core.domain.UserLanguage
+import me.alexy.hipipl.core.domain.VibeCode
 import me.alexy.hipipl.core.presentation.UiText
 import me.alexy.hipipl.feature.hostitem.R
 import me.alexy.hipipl.feature.hostme.ui.hostsearch.toGenderAccent
-import kotlin.math.roundToInt
 import java.time.format.DateTimeFormatter
+import kotlin.math.roundToInt
 
 private val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
@@ -40,11 +42,10 @@ fun HostUser.toHostDetailsUi(): HostDetailsUi {
         hostText = host.text,
         donateAmount = donate,
         showDonation = donate > 0,
-        contacts = contacts,
-        hasContacts = contacts.isNotEmpty(),
         hostListingId = host.hostId,
         lastActivityText = lastActivity?.toActivityStatusText(),
-        vibeLabels = vibes.map { it.label },
+        lastActivityStatus = lastActivity,
+        vibes = vibes.map { it.toVibeText() },
     )
 }
 
@@ -52,6 +53,36 @@ private fun ActivityStatus.toActivityStatusText(): UiText = when (this) {
     ActivityStatus.TODAY -> UiText.StringResource(R.string.activity_status_today)
     ActivityStatus.RECENTLY -> UiText.StringResource(R.string.activity_status_recently)
     ActivityStatus.LONG_AGO -> UiText.StringResource(R.string.activity_status_long_ago)
+}
+
+// Vibe labels are now localized on-device from `code` (see GET /api/v1/vibes); `label` is only
+// a fallback for VibeCode.UNKNOWN (codes the app doesn't recognize yet).
+private fun HostVibe.toVibeText(): UiText {
+    val resId = code.toVibeStringRes() ?: return UiText.DynamicString(label)
+    return UiText.StringResource(resId)
+}
+
+private fun VibeCode.toVibeStringRes(): Int? = when (this) {
+    VibeCode.ACTIVE_SPORT -> R.string.vibe_active_sport
+    VibeCode.AGAINST_ALCOHOL -> R.string.vibe_against_alcohol
+    VibeCode.AMBIVERT -> R.string.vibe_ambivert
+    VibeCode.BUSINESS -> R.string.vibe_business
+    VibeCode.CREATIVITY -> R.string.vibe_creativity
+    VibeCode.DONT_CARE -> R.string.vibe_dont_care
+    VibeCode.ESCAPISM -> R.string.vibe_escapism
+    VibeCode.ESOTERICS -> R.string.vibe_esoterics
+    VibeCode.EXTROVERT -> R.string.vibe_extrovert
+    VibeCode.HEALTHY_LIFESTYLE -> R.string.vibe_healthy_lifestyle
+    VibeCode.INTROVERT -> R.string.vibe_introvert
+    VibeCode.LUXURY_FASHION -> R.string.vibe_luxury_fashion
+    VibeCode.MELANCHOLY -> R.string.vibe_melancholy
+    VibeCode.NEUTRAL_ALCOHOL -> R.string.vibe_neutral_alcohol
+    VibeCode.PARTIES -> R.string.vibe_parties
+    VibeCode.PRO_ALCOHOL -> R.string.vibe_pro_alcohol
+    VibeCode.SCIENCE -> R.string.vibe_science
+    VibeCode.SILENCE -> R.string.vibe_silence
+    VibeCode.SOULFUL_EVENINGS -> R.string.vibe_soulful_evenings
+    VibeCode.UNKNOWN -> null
 }
 
 private fun UserLanguage.toLanguageUi(): LanguageUi {

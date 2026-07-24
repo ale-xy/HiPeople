@@ -1,6 +1,14 @@
 package me.alexy.hipipl.feature.hostme.ui.hostdetails
 
 import android.content.ClipData
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import androidx.browser.customtabs.CustomTabsClient
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.browser.customtabs.CustomTabsServiceConnection
+import androidx.browser.customtabs.CustomTabsSession
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,9 +25,12 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ClipEntry
@@ -28,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import me.alexy.hipipl.core.designsystem.AppColors
@@ -35,6 +47,7 @@ import me.alexy.hipipl.core.designsystem.HiPeopleTheme
 import me.alexy.hipipl.core.presentation.ObserveAsEvents
 import me.alexy.hipipl.core.presentation.asString
 import org.koin.androidx.compose.koinViewModel
+import kotlin.math.roundToInt
 
 @Composable
 fun HostDetailsScreen(
@@ -48,6 +61,31 @@ fun HostDetailsScreen(
     val clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    var customTabsSession by remember { mutableStateOf<CustomTabsSession?>(null) }
+
+    // Partial Custom Tabs only render as a bottom sheet when launched through a real
+    // CustomTabsSession bound to the browser's CustomTabsService — a plain CustomTabsIntent
+    // with no session just opens the browser's regular full-screen tab.
+    DisposableEffect(context) {
+        val connection = object : CustomTabsServiceConnection() {
+            override fun onCustomTabsServiceConnected(name: ComponentName, client: CustomTabsClient) {
+                client.warmup(0L)
+                customTabsSession = client.newSession(null)
+            }
+
+            override fun onServiceDisconnected(name: ComponentName) {
+                customTabsSession = null
+            }
+        }
+        val browserPackage = CustomTabsClient.getPackageName(context, null)
+        val bound = browserPackage != null &&
+            CustomTabsClient.bindCustomTabsService(context, browserPackage, connection)
+
+        onDispose {
+            customTabsSession = null
+            if (bound) context.unbindService(connection)
+        }
+    }
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
@@ -58,6 +96,12 @@ fun HostDetailsScreen(
                 coroutineScope.launch {
                     clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(event.text, event.text)))
                 }
+            }
+            is HostDetailsEvent.OpenUrl -> {
+                openInPartialTab(context = context, url = event.url, session = customTabsSession)
+            }
+            is HostDetailsEvent.OpenMap -> {
+                openMapIntent(context = context, query = event.query, preferGoogleMaps = event.preferGoogleMaps)
             }
             HostDetailsEvent.NavigateToAuth -> onNavigateToAuth()
         }
@@ -125,6 +169,32 @@ fun HostDetailsScreen(
     }
 }
 
+// Partial Custom Tabs: launches the URL as a bottom sheet over the app instead of a full-screen
+// browser. Falls back to a normal full-screen tab if the resolved browser doesn't support it.
+private const val PARTIAL_TAB_HEIGHT_DP = 640
+
+private fun openInPartialTab(context: Context, url: String, session: CustomTabsSession?) {
+    val heightPx = (PARTIAL_TAB_HEIGHT_DP * context.resources.displayMetrics.density).roundToInt()
+    CustomTabsIntent.Builder(session)
+        .setInitialActivityHeightPx(heightPx, CustomTabsIntent.ACTIVITY_HEIGHT_ADJUSTABLE)
+        .setToolbarCornerRadiusDp(16)
+        .build()
+        .launchUrl(context, url.toUri())
+}
+
+private fun openMapIntent(context: Context, query: String, preferGoogleMaps: Boolean) {
+    val uri = "geo:0,0?q=${Uri.encode(query)}".toUri()
+    val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+        if (preferGoogleMaps) setPackage("com.google.android.apps.maps")
+    }
+    val resolvedIntent = if (intent.resolveActivity(context.packageManager) != null) {
+        intent
+    } else {
+        Intent(Intent.ACTION_VIEW, uri)
+    }
+    context.startActivity(resolvedIntent)
+}
+
 @Preview
 @Composable
 private fun HostDetailsScreenPreview(
@@ -169,29 +239,37 @@ private fun HostDetailsContent(
                     totalReviews = host.totalReviews,
                     ratingValueText = host.ratingValueText,
                     cityText = host.cityText,
+                    onOpenMap = { preferGoogleMaps -> onAction(HostDetailsAction.OpenCityMap(preferGoogleMaps)) },
                     lastActivityText = host.lastActivityText,
-                    vibeLabels = host.vibeLabels,
+                    lastActivityStatus = host.lastActivityStatus,
                 )
 
                 HorizontalDivider(color = AppColors.Divider)
 
                 LanguagesSection(languages = host.languages)
 
-                HostingGuestsCard(hostText = host.hostText, hostingParams = host.hostingParams)
+                VibePillsSection(vibes = host.vibes)
 
-                AboutCard(description = host.description)
+                HostingGuestsCard(
+                    hostText = host.hostText,
+                    hostingParams = host.hostingParams,
+                    onTranslate = { onAction(HostDetailsAction.Translate(host.hostText)) },
+                )
 
-                if (host.hasContacts) {
-                    ContactsCard(
-                        contactsState = state.contactsState,
-                        messageDraft = state.messageDraft,
-                        isSendingMessage = state.isSendingMessage,
-                        canSendMessage = state.canSendMessage,
-                        onRevealContacts = { onAction(HostDetailsAction.RevealContacts) },
-                        onMessageDraftChange = { onAction(HostDetailsAction.OnMessageDraftChange(it)) },
-                        onSendMessage = { onAction(HostDetailsAction.SendMessage) },
-                    )
-                }
+                AboutCard(
+                    description = host.description,
+                    onTranslate = { onAction(HostDetailsAction.Translate(host.description)) },
+                )
+
+                ContactsCard(
+                    contactsState = state.contactsState,
+                    messageDraft = state.messageDraft,
+                    isSendingMessage = state.isSendingMessage,
+                    canSendMessage = state.canSendMessage,
+                    onRevealContacts = { onAction(HostDetailsAction.RevealContacts) },
+                    onMessageDraftChange = { onAction(HostDetailsAction.OnMessageDraftChange(it)) },
+                    onSendMessage = { onAction(HostDetailsAction.SendMessage) },
+                )
 
                 ActionRow(
                     isFavorited = state.isFavorited,
@@ -208,6 +286,7 @@ private fun HostDetailsContent(
                     errorText = state.reviewsError?.asString(),
                     onToggleGroupExpanded = { onAction(HostDetailsAction.ToggleReviewGroupExpanded(it)) },
                     onShowMoreReviews = { onAction(HostDetailsAction.ShowMoreReviews) },
+                    onAddReview = { onAction(HostDetailsAction.AddReview) },
                 )
             }
         }

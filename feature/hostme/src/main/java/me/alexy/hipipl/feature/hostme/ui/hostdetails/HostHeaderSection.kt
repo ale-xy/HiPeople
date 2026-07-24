@@ -1,12 +1,12 @@
 package me.alexy.hipipl.feature.hostme.ui.hostdetails
 
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Female
 import androidx.compose.material.icons.filled.Groups
@@ -18,7 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,11 +29,12 @@ import me.alexy.hipipl.core.designsystem.HiPeopleTheme
 import me.alexy.hipipl.core.designsystem.components.NameWithAgeText
 import me.alexy.hipipl.core.designsystem.components.PillChip
 import me.alexy.hipipl.core.designsystem.components.ReferencesText
+import me.alexy.hipipl.core.designsystem.md_theme_light_outline
 import me.alexy.hipipl.core.designsystem.toColor
+import me.alexy.hipipl.core.domain.ActivityStatus
 import me.alexy.hipipl.core.presentation.UiText
 import me.alexy.hipipl.core.presentation.asString
 import me.alexy.hipipl.feature.hostitem.R
-import androidx.core.net.toUri
 
 @Composable
 fun HostHeaderSection(
@@ -43,12 +44,11 @@ fun HostHeaderSection(
     totalReviews: Int,
     ratingValueText: String?,
     cityText: String,
+    onOpenMap: (preferGoogleMaps: Boolean) -> Unit,
     modifier: Modifier = Modifier,
     lastActivityText: UiText? = null,
-    vibeLabels: List<String> = emptyList(),
+    lastActivityStatus: ActivityStatus? = null,
 ) {
-    val context = LocalContext.current
-
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             NameWithAgeText(name = name, ageText = ageText)
@@ -68,21 +68,22 @@ fun HostHeaderSection(
             }
         }
 
-        ReferencesText(referenceCount = totalReviews, scoreText = ratingValueText)
-
-        if (lastActivityText != null) {
-            Text(
-                text = lastActivityText.asString(),
-                style = MaterialTheme.typography.labelMedium,
-                color = AppColors.Success,
-            )
-        }
-
-        if (vibeLabels.isNotEmpty()) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                vibeLabels.forEach { label -> PillChip(text = label) }
+        if (lastActivityText != null && lastActivityStatus != null) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .background(color = lastActivityStatus.toColor(), shape = CircleShape),
+                )
+                Text(
+                    text = lastActivityText.asString(),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
+
+        ReferencesText(referenceCount = totalReviews, scoreText = ratingValueText)
 
         if (cityText.isNotBlank()) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -100,28 +101,21 @@ fun HostHeaderSection(
                 )
                 PillChip(
                     text = stringResource(R.string.open_in_google_maps),
-                    onClick = { openMap(context = context, query = cityText, preferGoogleMaps = true) },
+                    onClick = { onOpenMap(true) },
                 )
                 PillChip(
                     text = stringResource(R.string.open_in_other_maps),
-                    onClick = { openMap(context = context, query = cityText, preferGoogleMaps = false) },
+                    onClick = { onOpenMap(false) },
                 )
             }
         }
     }
 }
 
-private fun openMap(context: Context, query: String, preferGoogleMaps: Boolean) {
-    val uri = "geo:0,0?q=${Uri.encode(query)}".toUri()
-    val intent = Intent(Intent.ACTION_VIEW, uri).apply {
-        if (preferGoogleMaps) setPackage("com.google.android.apps.maps")
-    }
-    val resolvedIntent = if (intent.resolveActivity(context.packageManager) != null) {
-        intent
-    } else {
-        Intent(Intent.ACTION_VIEW, uri)
-    }
-    context.startActivity(resolvedIntent)
+private fun ActivityStatus.toColor(): Color = when (this) {
+    ActivityStatus.TODAY -> AppColors.Success
+    ActivityStatus.RECENTLY -> AppColors.Warning
+    ActivityStatus.LONG_AGO -> md_theme_light_outline
 }
 
 @Preview
@@ -135,6 +129,9 @@ private fun HostHeaderSectionPreview() {
             totalReviews = 23,
             ratingValueText = "8.9",
             cityText = "Vidnoye",
+            onOpenMap = {},
+            lastActivityText = UiText.DynamicString("Was recently"),
+            lastActivityStatus = ActivityStatus.RECENTLY,
         )
     }
 }
