@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Auth screen: keys taken from "Авторизация" doc, "Локализация" section -->
+    <string name="auth_title">Авторизоваться</string>
+    <string name="auth_agree_data_use">Авторизуясь, вы соглашаетесь с правилами</string>
+    <string name="auth_link_data_use">https://hipipl.com/privacy</string>
+    <string name="auth_text_skip">У вас не заполнены обязательные данные профиля. Их нужно обязательно заполнить, но можно потом.</string>
+    <string name="auth_button_now">Заполнить сейчас</string>
+    <string name="auth_button_skip">Позже</string>
+    <string name="auth_code_copied">Код скопирован в буфер, нажмите на кнопку ниже и отправьте код в открывшийся диалог</string>
+    <string name="auth_copy_failed">Не удалось скопировать код</string>
+    <string name="auth_code_send_instruction">Отправьте код авторизации в удобную социальную сеть и следуйте инструкции</string>
+    <string name="auth_timeout">Время ожидания авторизации истекло</string>
+    <string name="auth_code_updated">Код обновлен! Используйте новый код для авторизации.</string>
+
+    <!-- Provider display names/labels - not in the API doc, since captions there come from
+         get-code's `instruction` field; these are the fallback label shown on each button. -->
+    <string name="auth_provider_vk">VK ID</string>
+    <string name="auth_provider_telegram">Telegram</string>
+    <string name="auth_provider_whatsapp">WhatsApp</string>
+    <string name="auth_provider_facebook">Facebook</string>
+    <string name="auth_login_via">Войти через %1$s</string>
+</resources>

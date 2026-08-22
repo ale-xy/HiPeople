@@ -21,7 +21,7 @@ import me.alexy.hipipl.core.domain.VibeCode
 
 // Map HostUserDto (details endpoint) to HostUser
 fun HostUserDto.toHostUser(): HostUser? {
-    val userIdValue = id ?: return null
+    val userIdValue = userId ?: id ?: return null
     val hostData = host ?: return null
     val hostIdValue = hostData.id ?: return null
 
@@ -33,7 +33,7 @@ fun HostUserDto.toHostUser(): HostUser? {
         description = about.orEmpty(),
         totalReviews = totalReviews ?: 0,
         contacts = contacts?.toContactMap() ?: mapOf(),
-        averageRating = rating ?: 0.0f,
+        averageRating = rating?.toFloatOrNull() ?: 0.0f,
         photos = photos?.mapNotNull { it.toPhoto() } ?: listOf(),
         donate = donate ?: 0,
         userLanguages = userLangs?.mapNotNull { it.toUserLanguage() } ?: listOf(),
@@ -121,8 +121,9 @@ private fun String?.toActivityStatus(): ActivityStatus? {
 }
 
 private fun UserVibeDto.toHostVibe(): HostVibe? {
-    val vibeLabel = label ?: return null
     val vibeCode = code ?: return null
+    // Use group as label fallback if needed, or use code itself as label
+    val vibeLabel = group ?: vibeCode
     return HostVibe(label = vibeLabel, code = vibeCode.toVibeCode())
 }
 

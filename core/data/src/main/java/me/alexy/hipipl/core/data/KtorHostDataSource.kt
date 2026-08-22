@@ -13,8 +13,8 @@ import me.alexy.hipipl.core.domain.HostRemoteDataSource
 import me.alexy.hipipl.core.domain.HostSearchFilters
 import me.alexy.hipipl.core.domain.HostSearchResult
 import me.alexy.hipipl.core.domain.HostUser
-import me.alexy.hipipl.core.domain.UserReviews
 import me.alexy.hipipl.core.domain.Result
+import me.alexy.hipipl.core.domain.UserReviews
 import me.alexy.hipipl.core.domain.map
 
 class KtorHostDataSource(
@@ -64,8 +64,9 @@ class KtorHostDataSource(
         // Add optional user parameter (no token in v1)
         userId?.let { queryParams["user"] = it }
         
+        queryParams["type"] = "host"
         val result = httpClient.getV1<HostUserDto>(
-            route = "api/v1/hosts/$hostId",
+            route = "api/v1/ad/$hostId",
             queryParameters = queryParams
         )
         return when (result) {

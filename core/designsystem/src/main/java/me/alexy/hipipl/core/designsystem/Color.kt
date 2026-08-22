@@ -42,6 +42,11 @@ object AppColors {
 
     /** VK brand blue, used for the VK contact chip. */
     val VkBrand = Color(0xFF4F7CB0)
+
+    /** Auth screen provider button backgrounds - each network's own brand color. */
+    val TelegramBrand = Color(0xFF26A5E4)
+    val WhatsAppBrand = Color(0xFF25D366)
+    val FacebookBrand = Color(0xFF1877F2)
 }
 
 /**
