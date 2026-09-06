@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Bottom navigation labels -->
+    <string name="nav_search">Поиск</string>
+    <string name="nav_favorites">Избранное</string>
+    <string name="nav_add">Добавить</string>
+    <string name="nav_messages">Сообщения</string>
+    <string name="nav_menu">Меню</string>
+
+    <!-- Favorites (stub) -->
+    <string name="favorites_title">Избранное</string>
+    <string name="favorites_empty_title">Пока пусто</string>
+    <string name="favorites_empty_subtitle">Здесь появятся хосты и путешественники, которых вы добавите в избранное.</string>
+
+    <!-- Messages (stub) -->
+    <string name="messages_title">Сообщения</string>
+    <string name="messages_empty_title">Сообщений нет</string>
+    <string name="messages_empty_subtitle">Здесь будут переписки с хостами, гостями и поддержкой.</string>
+
+    <!-- Add menu -->
+    <string name="add_menu_title">Добавить</string>
+    <string name="add_menu_subtitle">Выберите, что хотите сделать: принять гостей, найти жильё в поездке или оставить отзыв.</string>
+    <string name="add_menu_host_title">Принимать гостей</string>
+    <string name="add_menu_host_subtitle">Разместить объявление о приёме гостей</string>
+    <string name="add_menu_request_title">Запрос хостам</string>
+    <string name="add_menu_request_subtitle">Найти жильё в поездке</string>
+    <string name="add_menu_review_title">Оставить отзыв</string>
+    <string name="add_menu_review_subtitle">О хосте или госте</string>
+
+    <!-- Profile / Menu tab (stub) -->
+    <string name="profile_menu_title">Меню</string>
+    <string name="profile_menu_settings">Настройки</string>
+
+    <!-- Settings (stub) -->
+    <string name="settings_title">Настройки</string>
+    <string name="coming_soon_title">Скоро</string>
+    <string name="settings_coming_soon_subtitle">Раздел настроек ещё в разработке.</string>
+
+    <!-- Host listing form (stub) -->
+    <string name="host_listing_form_title">Приём гостей</string>
+    <string name="host_listing_form_coming_soon_subtitle">Форма размещения жилья скоро будет доступна.</string>
+
+    <!-- Leave a review (stub) -->
+    <string name="leave_review_title">Оставить отзыв</string>
+    <string name="leave_review_coming_soon_subtitle">Поиск пользователя для отзыва скоро будет доступен.</string>
+
+    <string name="content_description_back">Назад</string>
+</resources>
