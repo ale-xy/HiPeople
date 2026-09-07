@@ -4,8 +4,7 @@ import java.time.LocalDateTime
 
 interface MessagingRemoteDataSource {
     suspend fun getContacts(
-        userId: Int,
-        targetUserId: Int,
+        listingId: Int,
     ): Result<HostContacts, DataError.Network>
 
     suspend fun sendMessage(

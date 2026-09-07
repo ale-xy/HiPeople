@@ -21,8 +21,10 @@ data class HostDetailsState(
     val reportSheet: ReportSheetState = ReportSheetState(),
     val photoViewerStartIndex: Int = 0,
     val isPhotoViewerOpen: Boolean = false,
-    val expandedReviewGroups: Set<Int> = emptySet(),
-    val visibleReviewGroupCount: Int = 2,
+    val reviewsHasMore: Boolean = false,
+    val reviewsNextOffset: Int? = null,
+    val isLoadingMoreReviews: Boolean = false,
+    val seenReviewAuthorIds: Set<Int> = emptySet(),  // De-dupes mutual threads, which every page returns in full
 )
 
 sealed interface ContactsUiState {
@@ -53,7 +55,7 @@ sealed interface HostDetailsAction {
     data class OpenPhotoViewer(val index: Int) : HostDetailsAction
     data object ClosePhotoViewer : HostDetailsAction
     data class ToggleReviewGroupExpanded(val index: Int) : HostDetailsAction
-    data object ShowMoreReviews : HostDetailsAction
+    data object LoadMoreReviews : HostDetailsAction
     data object CopyProfileLink : HostDetailsAction
     data object AddReview : HostDetailsAction
     data class Translate(val text: String) : HostDetailsAction
@@ -105,7 +107,12 @@ data class ReviewGroupUi(
     val received: List<ReviewUi>,
     val responses: List<ReviewUi>,
     val isMutual: Boolean,
-)
+    val hasMore: Boolean,
+    val isExpanded: Boolean = false,
+) {
+    val visibleReceived: List<ReviewUi> get() = if (isExpanded) received else received.take(1)
+    val visibleResponses: List<ReviewUi> get() = if (isExpanded) responses else responses.take(1)
+}
 
 data class ReviewUi(
     val id: Int,

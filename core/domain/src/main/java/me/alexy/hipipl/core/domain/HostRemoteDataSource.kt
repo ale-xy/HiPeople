@@ -18,5 +18,7 @@ interface HostRemoteDataSource {
     suspend fun getReviews(
         userId: Int,
         viewerId: Int?,
+        offset: Int = 0,
+        limit: Int = 20,
     ): Result<UserReviews, DataError.Network>
 }

@@ -18,14 +18,13 @@ class KtorMessagingDataSource(
 ) : MessagingRemoteDataSource {
 
     override suspend fun getContacts(
-        userId: Int,
-        targetUserId: Int,
+        listingId: Int,
     ): Result<HostContacts, DataError.Network> {
         // Bespoke envelope (data is a list, error.code is numeric) - doesn't fit getV1's
         // ApiResponse<T>/unwrap(), so this uses the raw `get` and maps success/error itself.
         return httpClient.get<ContactsResponseDto>(
-            route = "api/v1/users/$userId/contacts",
-            queryParameters = mapOf("target_user_id" to targetUserId, "type" to "hosts")
+            route = "api/v1/contacts",
+            queryParameters = mapOf("type" to "host", "id" to listingId)
         ).map { it.toHostContacts() }
     }
 

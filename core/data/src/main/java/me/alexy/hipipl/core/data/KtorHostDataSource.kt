@@ -81,12 +81,17 @@ class KtorHostDataSource(
     override suspend fun getReviews(
         userId: Int,
         viewerId: Int?,
+        offset: Int,
+        limit: Int,
     ): Result<UserReviews, DataError.Network> {
-        val queryParams = mutableMapOf<String, Any>()
-        
+        val queryParams = mutableMapOf<String, Any>(
+            "offset" to offset,
+            "limit" to limit,
+        )
+
         // Add optional viewer_id parameter (no token in v1)
         viewerId?.let { queryParams["viewer_id"] = it }
-        
+
         return httpClient.getV1<UserReviewsResponseDto>(
             route = "api/v1/users/$userId/reviews",
             queryParameters = queryParams

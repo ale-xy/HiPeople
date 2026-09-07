@@ -12,7 +12,6 @@ data class HostUserDto(
     val age: Int? = null,
     val about: String? = null,  // v1 uses "about" not "descript"
     @SerialName("total_reviews") val totalReviews: Int? = null,
-    val contacts: ContactsDto? = ContactsDto(),
     val rating: String? = null,  // v1 returns rating as string (e.g., "9.8")
     val photos: List<PhotoDto>? = null,
     val donate: Int? = null,

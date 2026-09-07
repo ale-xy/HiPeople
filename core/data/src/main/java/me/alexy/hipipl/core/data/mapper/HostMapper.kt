@@ -1,6 +1,5 @@
 package me.alexy.hipipl.core.data.mapper
 
-import me.alexy.hipipl.core.data.dto.ContactsDto
 import me.alexy.hipipl.core.data.dto.HostDto
 import me.alexy.hipipl.core.data.dto.HostListItemDto
 import me.alexy.hipipl.core.data.dto.HostUserDto
@@ -9,7 +8,6 @@ import me.alexy.hipipl.core.data.dto.PhotoDto
 import me.alexy.hipipl.core.data.dto.UserLangDto
 import me.alexy.hipipl.core.data.dto.UserVibeDto
 import me.alexy.hipipl.core.domain.ActivityStatus
-import me.alexy.hipipl.core.domain.ContactType
 import me.alexy.hipipl.core.domain.Gender
 import me.alexy.hipipl.core.domain.HostDetails
 import me.alexy.hipipl.core.domain.HostSearchResult
@@ -32,7 +30,6 @@ fun HostUserDto.toHostUser(): HostUser? {
         age = age ?: 0,
         description = about.orEmpty(),
         totalReviews = totalReviews ?: 0,
-        contacts = contacts?.toContactMap() ?: mapOf(),
         averageRating = rating?.toFloatOrNull() ?: 0.0f,
         photos = photos?.mapNotNull { it.toPhoto() } ?: listOf(),
         donate = donate ?: 0,
@@ -54,7 +51,6 @@ fun HostListItemDto.toHostUser(): HostUser? {
         age = age ?: 0,
         description = "",
         totalReviews = totalReviews ?: 0,
-        contacts = emptyMap(),
         averageRating = rating?.toFloatOrNull() ?: 0.0f,
         photos = photos?.mapNotNull { it.toPhoto() } ?: listOf(),
         donate = 0,
@@ -98,17 +94,6 @@ fun String?.toGenderFromString(): Gender {
 // Parse "y"/"n" to Boolean
 fun String?.toYesNo(): Boolean {
     return this == "y"
-}
-
-private fun ContactsDto.toContactMap(): Map<ContactType, String> {
-    val contactMap: MutableMap<ContactType, String> = mutableMapOf()
-    vk?.let { contactMap[ContactType.VK] = it.toString() }
-    tg?.let { contactMap[ContactType.TELEGRAM] = it }
-    tel?.let { contactMap[ContactType.PHONE] = it }
-    fb?.let { contactMap[ContactType.FACEBOOK] = it.toString() }
-    wa?.let { contactMap[ContactType.WHATSAPP] = it }
-    extra?.let { contactMap[ContactType.OTHER] = it }
-    return contactMap.toMap()
 }
 
 private fun String?.toActivityStatus(): ActivityStatus? {

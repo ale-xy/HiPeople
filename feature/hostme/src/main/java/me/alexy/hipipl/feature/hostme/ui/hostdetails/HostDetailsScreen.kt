@@ -280,12 +280,12 @@ private fun HostDetailsContent(
                 ReviewsSection(
                     totalReviews = host.totalReviews,
                     reviewGroups = state.reviewGroups,
-                    visibleGroupCount = state.visibleReviewGroupCount,
-                    expandedGroups = state.expandedReviewGroups,
+                    hasMoreReviews = state.reviewsHasMore,
+                    isLoadingMoreReviews = state.isLoadingMoreReviews,
                     isLoading = state.isLoadingReviews,
                     errorText = state.reviewsError?.asString(),
                     onToggleGroupExpanded = { onAction(HostDetailsAction.ToggleReviewGroupExpanded(it)) },
-                    onShowMoreReviews = { onAction(HostDetailsAction.ShowMoreReviews) },
+                    onLoadMoreReviews = { onAction(HostDetailsAction.LoadMoreReviews) },
                     onAddReview = { onAction(HostDetailsAction.AddReview) },
                 )
             }

@@ -1,7 +1,7 @@
 package me.alexy.hipipl.core.data
 
 import io.ktor.client.HttpClient
-import me.alexy.hipipl.core.data.dto.GeoNameDto
+import me.alexy.hipipl.core.data.dto.GeoSearchResponseDto
 import me.alexy.hipipl.core.data.mapper.toLocation
 import me.alexy.hipipl.core.domain.DataError
 import me.alexy.hipipl.core.domain.GeoRemoteDataSource
@@ -13,14 +13,16 @@ class KtorGeoDataSource(
     private val httpClient: HttpClient
 ) : GeoRemoteDataSource {
 
+    // GET /geo/search is deprecated/legacy; geo-name search now lives behind the
+    // universal get_search_find_multi endpoint's "type": "geo" branch.
     override suspend fun getLocationsByName(name: String): Result<List<Location>, DataError.Network> {
-        return httpClient.getV1<List<GeoNameDto>>(
-            route = "api/v1/geo/search",
+        return httpClient.getV1<GeoSearchResponseDto>(
+            route = "api/v1/get_search_find_multi",
             queryParameters = mapOf(
                 "query" to name
             )
-        ).map { dtos ->
-            dtos.mapNotNull { it.toLocation() }
+        ).map { response ->
+            response.results.orEmpty().mapNotNull { it.toLocation() }
         }
     }
 }

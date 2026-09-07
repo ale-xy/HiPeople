@@ -71,17 +71,15 @@ class HostDetailsViewModel(
                 _state.update { it.copy(isPhotoViewerOpen = false) }
             }
             is HostDetailsAction.ToggleReviewGroupExpanded -> {
-                _state.update {
-                    val expanded = it.expandedReviewGroups
-                    val updated = if (action.index in expanded) expanded - action.index else expanded + action.index
-                    it.copy(expandedReviewGroups = updated)
+                _state.update { current ->
+                    current.copy(
+                        reviewGroups = current.reviewGroups.mapIndexed { index, group ->
+                            if (index == action.index) group.copy(isExpanded = !group.isExpanded) else group
+                        }
+                    )
                 }
             }
-            HostDetailsAction.ShowMoreReviews -> {
-                _state.update {
-                    it.copy(visibleReviewGroupCount = (it.visibleReviewGroupCount + 2).coerceAtMost(it.reviewGroups.size))
-                }
-            }
+            HostDetailsAction.LoadMoreReviews -> loadMoreReviews()
             HostDetailsAction.CopyProfileLink -> copyProfileLink()
             HostDetailsAction.AddReview -> {
                 sendEvent(HostDetailsEvent.ShowSnackbar(UiText.StringResource(R.string.review_form_coming_soon)))
@@ -145,7 +143,7 @@ class HostDetailsViewModel(
             }
 
             _state.update { it.copy(contactsState = ContactsUiState.Loading) }
-            messagingDataSource.getContacts(userId = userId, targetUserId = host.userId)
+            messagingDataSource.getContacts(listingId = host.hostListingId)
                 .onSuccess { contacts ->
                     _state.update { it.copy(contactsState = contacts.toContactsUiState()) }
                 }
@@ -289,7 +287,10 @@ class HostDetailsViewModel(
                     _state.update {
                         it.copy(
                             reviewGroups = userReviews.threads.map { thread -> thread.toReviewGroupUi(hostName) },
-                            isLoadingReviews = false
+                            isLoadingReviews = false,
+                            reviewsHasMore = userReviews.hasMore,
+                            reviewsNextOffset = userReviews.nextOffset,
+                            seenReviewAuthorIds = userReviews.threads.mapNotNull { it.authorId }.toSet(),
                         )
                     }
                 }
@@ -301,6 +302,40 @@ class HostDetailsViewModel(
                             reviewsError = error.toUiText()
                         )
                     }
+                }
+        }
+    }
+
+    private fun loadMoreReviews() {
+        val state = _state.value
+        val host = state.host ?: return
+        val offset = state.reviewsNextOffset ?: return
+        if (!state.reviewsHasMore || state.isLoadingMoreReviews) return
+
+        viewModelScope.launch {
+            _state.update { it.copy(isLoadingMoreReviews = true) }
+
+            hostDataSource.getReviews(
+                userId = host.userId,
+                viewerId = sessionManager.currentUserId(),
+                offset = offset,
+            )
+                .onSuccess { userReviews ->
+                    _state.update { current ->
+                        // Mutual threads are returned in full on every page, so drop authors we've already shown.
+                        val newThreads = userReviews.threads.filter { it.authorId !in current.seenReviewAuthorIds }
+                        current.copy(
+                            reviewGroups = current.reviewGroups + newThreads.map { it.toReviewGroupUi(host.name) },
+                            seenReviewAuthorIds = current.seenReviewAuthorIds + newThreads.mapNotNull { it.authorId },
+                            reviewsHasMore = userReviews.hasMore,
+                            reviewsNextOffset = userReviews.nextOffset,
+                            isLoadingMoreReviews = false,
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    _state.update { it.copy(isLoadingMoreReviews = false) }
+                    sendEvent(HostDetailsEvent.ShowSnackbar(error.toUiText()))
                 }
         }
     }

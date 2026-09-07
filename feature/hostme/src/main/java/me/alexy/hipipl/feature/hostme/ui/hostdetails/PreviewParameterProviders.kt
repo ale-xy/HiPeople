@@ -58,6 +58,7 @@ private val sampleReviewGroups = listOf(
             )
         ),
         isMutual = true,
+        hasMore = false,
     ),
 )
 

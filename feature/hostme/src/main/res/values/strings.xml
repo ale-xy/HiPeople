@@ -68,6 +68,7 @@
     <string name="button_add_rev">Оставить отзыв</string>
     <string name="show_more_reviews">Показать ещё отзывы</string>
     <string name="hide_reviews">Скрыть отзывы</string>
+    <string name="load_more_reviews">Загрузить ещё отзывы</string>
     <string name="button_copy_link">Скопировать ссылку</string>
     <string name="copied">Скопировано</string>
     <string name="review_cs_guest">Кауч Гость</string>

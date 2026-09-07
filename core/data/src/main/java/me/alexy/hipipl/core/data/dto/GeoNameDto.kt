@@ -14,3 +14,12 @@ data class GeoNameDto(
     @SerialName("country_id") val countryId: Int? = null,
     @SerialName("region_id") val regionId: Int? = null,
 )
+
+/**
+ * The "type": "geo" branch of GET /api/v1/get_search_find_multi's response.
+ */
+@Serializable
+data class GeoSearchResponseDto(
+    val type: String? = null,
+    val results: List<GeoNameDto>? = null,
+)

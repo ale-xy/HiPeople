@@ -36,12 +36,12 @@ import me.alexy.hipipl.feature.hostitem.R
 fun ReviewsSection(
     totalReviews: Int,
     reviewGroups: List<ReviewGroupUi>,
-    visibleGroupCount: Int,
-    expandedGroups: Set<Int>,
+    hasMoreReviews: Boolean,
+    isLoadingMoreReviews: Boolean,
     isLoading: Boolean,
     errorText: String?,
     onToggleGroupExpanded: (Int) -> Unit,
-    onShowMoreReviews: () -> Unit,
+    onLoadMoreReviews: () -> Unit,
     onAddReview: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -77,16 +77,19 @@ fun ReviewsSection(
                 style = MaterialTheme.typography.bodyLarge,
             )
             else -> {
-                reviewGroups.take(visibleGroupCount).forEachIndexed { index, group ->
+                reviewGroups.forEachIndexed { index, group ->
                     ReviewGroup(
                         group = group,
-                        isExpanded = index in expandedGroups,
                         onToggleExpanded = { onToggleGroupExpanded(index) },
                     )
                 }
-                if (visibleGroupCount < reviewGroups.size) {
+                // Only offered once a full server page has been loaded and it reports more exist -
+                // this fetches the next page, it doesn't just reveal locally-buffered groups.
+                if (hasMoreReviews) {
                     Text(
-                        text = stringResource(R.string.show_more_reviews),
+                        text = stringResource(
+                            if (isLoadingMoreReviews) R.string.loading else R.string.load_more_reviews
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -94,7 +97,7 @@ fun ReviewsSection(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(14.dp))
-                            .clickable(onClick = onShowMoreReviews)
+                            .clickable(enabled = !isLoadingMoreReviews, onClick = onLoadMoreReviews)
                             .padding(vertical = 12.dp),
                     )
                 }
@@ -106,23 +109,18 @@ fun ReviewsSection(
 @Composable
 private fun ReviewGroup(
     group: ReviewGroupUi,
-    isExpanded: Boolean,
     onToggleExpanded: () -> Unit,
 ) {
-    val receivedToShow = if (isExpanded) group.received else group.received.take(1)
-    val responsesToShow = if (isExpanded) group.responses else group.responses.take(1)
-    val hasMore = group.received.size > 1 || group.responses.size > 1
-
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        receivedToShow.forEach { review ->
+        group.visibleReceived.forEach { review ->
             ReviewCard(review = review, isMutual = group.isMutual)
         }
-        responsesToShow.forEach { reply ->
+        group.visibleResponses.forEach { reply ->
             ReplyCard(reply = reply)
         }
-        if (hasMore) {
+        if (group.hasMore) {
             Text(
-                text = stringResource(if (isExpanded) R.string.hide_reviews else R.string.show_more_reviews),
+                text = stringResource(if (group.isExpanded) R.string.hide_reviews else R.string.show_more_reviews),
                 style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary,
@@ -256,14 +254,15 @@ private fun ReviewsSectionPreview() {
                         ReviewUi(2, "Anna", "13.05.2026", "Thanks Maria!", null, false, "Maria Volkova")
                     ),
                     isMutual = true,
+                    hasMore = false,
                 )
             ),
-            visibleGroupCount = 2,
-            expandedGroups = emptySet(),
+            hasMoreReviews = false,
+            isLoadingMoreReviews = false,
             isLoading = false,
             errorText = null,
             onToggleGroupExpanded = {},
-            onShowMoreReviews = {},
+            onLoadMoreReviews = {},
             onAddReview = {},
         )
     }

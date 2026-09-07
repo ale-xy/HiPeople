@@ -9,7 +9,6 @@ data class HostUser(
     val age: Int,
     val description: String,
     val totalReviews: Int,
-    val contacts: Map<ContactType, String>,
     val averageRating: Float,
     val photos: List<Photo>,
     val donate: Int,

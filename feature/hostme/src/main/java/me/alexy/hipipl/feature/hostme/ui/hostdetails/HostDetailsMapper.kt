@@ -99,6 +99,7 @@ fun ReviewThread.toReviewGroupUi(hostName: String): ReviewGroupUi {
             reply.toReviewUi(receiverName = received.firstOrNull()?.authorName).copy(authorName = hostName)
         },
         isMutual = isMutual,
+        hasMore = received.size > 1 || response.size > 1,
     )
 }
 
@@ -109,7 +110,7 @@ private fun Review.toReviewUi(receiverName: String?): ReviewUi {
         formattedDate = date.format(dateFormatter),
         text = text,
         photoUrl = if (photo.isNullOrBlank()) null else photo,
-        isGuest = type in listOf(ReviewType.SURF_POSITIVE, ReviewType.SURF_NEGATIVE),
+        isGuest = type == ReviewType.GUEST,
         receiverName = receiverName
     )
 }
